@@ -1,1 +1,2 @@
-"# js_index" 
+"# js_index"
+練習用
