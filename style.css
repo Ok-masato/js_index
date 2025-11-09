@@ -1,0 +1,96 @@
+/* 全体の背景など */
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 20px;
+}
+
+.contents {
+  background-color: rgb(206, 206, 206);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* グリッドレイアウト */
+.l-grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+/* カード全体 */
+.c-card {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.c-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* カード全体をリンクに */
+.c-card__detail {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* カード本文 */
+.c-card__body {
+  padding: 16px;
+  z-index: 1;
+  position: relative;
+}
+
+.c-card__title a {
+  text-decoration: none;
+  color: #333;
+}
+
+.c-card__title a:hover {
+  color: #007acc;
+}
+
+/* メタ情報 */
+.c-card__meta {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0 0;
+  display: flex;
+  gap: 8px;
+}
+
+.c-card__metaItem a {
+  text-decoration: none;
+  color: #666;
+  font-size: 0.9em;
+}
+
+.c-card__metaItem a:hover {
+  text-decoration: underline;
+}
+
+/* サムネイル画像 */
+.c-card__thumbnail img {
+  width: 100%;
+  display: block;
+}
+
+/* アクセシビリティ対応 */
+.u-visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}

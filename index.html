@@ -1,12 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sample HTML Page</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Welcome to the Sample HTML Page</h1>
-    <p>This is a simple HTML document structure.</p>
+    <main class="contents">
+      <h1>Welcome</h1>
+      <ul class="l-grid">
+        <!-- サンプル -->
+        <li class="c-card">
+          <a class="c-card__detail" href="index.html" tabindex="-1">
+            <span class="u-visuallyHidden">サンプル</span>
+          </a>
+          <div class="c-card__body">
+            <h3 class="c-card__title">
+              <a href="index.html">サンプルタイトル</a>
+            </h3>
+          </div>
+        </li>
+
+        <!-- Eclipse検索成形ツール -->
+        <li class="c-card">
+          <a
+            class="c-card__detail"
+            href="eclipse-search-formatter.html"
+            tabindex="-1"
+          >
+            <span class="u-visuallyHidden">Eclipse検索整形ツールへ</span>
+          </a>
+          <div class="c-card__body">
+            <h3 class="c-card__title">
+              <a href="eclipse-search-formatter.html">Eclipse検索整形ツール</a>
+            </h3>
+          </div>
+        </li>
+
+        <!-- CSVエラー行除去ツール -->
+        <li class="c-card">
+          <a
+            class="c-card__detail"
+            href="csv-error-row-remover.html"
+            tabindex="-1"
+          >
+            <span class="u-visuallyHidden">CSVエラー行除去ツールへ</span>
+          </a>
+          <div class="c-card__body">
+            <h3 class="c-card__title">
+              <a href="csv-error-row-remover.html">CSVエラー行除去ツール</a>
+            </h3>
+          </div>
+        </li>
+      </ul>
+    </main>
   </body>
 </html>
