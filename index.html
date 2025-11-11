@@ -1,59 +1,68 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sample HTML Page</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <main class="contents">
-      <h1>Welcome</h1>
-      <ul class="l-grid">
-        <!-- サンプル -->
-        <li class="c-card">
-          <a class="c-card__detail" href="index.html" tabindex="-1">
-            <span class="u-visuallyHidden">サンプル</span>
-          </a>
-          <div class="c-card__body">
-            <h3 class="c-card__title">
-              <a href="index.html">サンプルタイトル</a>
-            </h3>
-          </div>
-        </li>
 
-        <!-- Eclipse検索成形ツール -->
-        <li class="c-card">
-          <a
-            class="c-card__detail"
-            href="eclipse-search-formatter.html"
-            tabindex="-1"
-          >
-            <span class="u-visuallyHidden">Eclipse検索整形ツールへ</span>
-          </a>
-          <div class="c-card__body">
-            <h3 class="c-card__title">
-              <a href="eclipse-search-formatter.html">Eclipse検索整形ツール</a>
-            </h3>
-          </div>
-        </li>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sample HTML Page</title>
+	<link rel="stylesheet" href="style.css">
+</head>
 
-        <!-- CSVエラー行除去ツール -->
-        <li class="c-card">
-          <a
-            class="c-card__detail"
-            href="csv-error-row-remover.html"
-            tabindex="-1"
-          >
-            <span class="u-visuallyHidden">CSVエラー行除去ツールへ</span>
-          </a>
-          <div class="c-card__body">
-            <h3 class="c-card__title">
-              <a href="csv-error-row-remover.html">CSVエラー行除去ツール</a>
-            </h3>
-          </div>
-        </li>
-      </ul>
-    </main>
-  </body>
+<body>
+	<main class="contents">
+		<h1>Top</h1>
+		<ul id="l-grid" class="l-grid">
+		</ul>
+		<script>
+    const links = [
+	          {title:"Eclipse検索整形ツール", url: "/eclipse-search-formatter.html", external: false},
+	          {title:"CSVエラー行除去ツール", url: "/csv-error-row-remover.html", external: false},
+            {title:"IPアドレス情報取得", url: "https://ipinfo.io/", external: true},
+            {title:"差分抽出", url: "https://difff.jp/", external: true},
+	          {title:"サンプルタイトル", url: "/sample.html", external: false},
+	        ];
+          const ul = document.getElementById("l-grid");
+	        links.forEach(link => {
+	          const li = document.createElement("li");
+	          li.className = "c-card";
+	          // 背景リンク
+      const detailLink = document.createElement("a");
+	    detailLink.className = "c-card__detail";
+	    detailLink.href = link.url;
+	    detailLink.tabIndex = -1;
+
+	    const hiddenSpan = document.createElement("span");
+	    hiddenSpan.className = "u-visuallyHidden";
+	    hiddenSpan.textContent = link.title + "へ";
+
+	    detailLink.appendChild(hiddenSpan);
+	    li.appendChild(detailLink);
+
+	    // カード本文
+	    const bodyDiv = document.createElement("div");
+	    bodyDiv.className = "c-card__body";
+
+	    const h3 = document.createElement("h3");
+	    h3.className = "c-card__title";
+
+	    const titleLink = document.createElement("a");
+	    titleLink.href = link.url;
+	    titleLink.textContent = link.title;
+
+	    if (link.external) {
+	      titleLink.target = "_blank";
+	      titleLink.rel = "noopener noreferrer";
+	    }
+
+	    h3.appendChild(titleLink);
+	    bodyDiv.appendChild(h3);
+	    li.appendChild(bodyDiv);
+
+	    // ③ liをulに追加
+	    ul.appendChild(li);
+	        });
+		</script>
+	</main>
+</body>
+
 </html>
