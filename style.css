@@ -33,14 +33,14 @@ h1 {
 
 /* ===== カード ===== */
 .c-card {
-  position: relative; /* 👈 全体リンクに必要 */
+  position: relative; /* 全体リンクに必要 */
   background: linear-gradient(180deg, #fff 0%, #f9fafc 100%);
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   justify-content: stretch;
-  height: 100%; /* 👈 gridセルに合わせて伸びる */
+  height: 100%; /* gridセルに合わせて伸びる */
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -60,7 +60,7 @@ h1 {
 
 /* ===== カード本文 ===== */
 .c-card__body {
-  flex: 1; /* 👈 中身が少なくても伸びる */
+  flex: 1; /* 中身が少なくても伸びる */
   padding: 24px;
   display: flex;
   justify-content: center;
