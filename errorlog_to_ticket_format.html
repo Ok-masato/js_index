@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Log to Ticket Converter</title>
+    <style>
+      :root {
+        --primary-blue: #0056b3;
+        --soft-blue: #eef4fb;
+        --dark-gray: #343a40;
+        --medium-gray: #6c757d;
+        --light-gray: #f8f9fa;
+        --border-color: #dee2e6;
+        --success-green: #28a745;
+      }
+
+      body {
+        font-family:
+          "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+        background-color: #f0f2f5;
+        color: var(--dark-gray);
+        margin: 0;
+        padding: 40px 20px;
+        line-height: 1.5;
+      }
+
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        color: var(--primary-blue);
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 700;
+      }
+
+      /* 入力エリア */
+      .input-section {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 40px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--medium-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 150px;
+        box-sizing: border-box;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-family:
+          "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 0.9rem;
+        background-color: var(--light-gray);
+        transition:
+          border-color 0.2s,
+          background-color 0.2s;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-blue);
+        background-color: #fff;
+      }
+
+      .btn-primary {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        padding: 14px;
+        background-color: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: opacity 0.2s;
+      }
+
+      .btn-primary:hover {
+        opacity: 0.9;
+      }
+
+      /* 結果カード */
+      .result-card {
+        background: #ffffff;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        margin-bottom: 24px;
+        overflow: hidden;
+      }
+
+      .card-header {
+        background-color: var(--soft-blue);
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-header h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: var(--primary-blue);
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      .copy-group {
+        margin-bottom: 20px;
+      }
+
+      .copy-group:last-child {
+        margin-bottom: 0;
+      }
+
+      .field-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+
+      .field-header label {
+        margin-bottom: 0;
+      }
+
+      .btn-copy {
+        background: none;
+        border: 1px solid var(--primary-blue);
+        color: var(--primary-blue);
+        padding: 4px 12px;
+        font-size: 0.75rem;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+
+      .btn-copy:hover {
+        background-color: var(--primary-blue);
+        color: #fff;
+      }
+
+      .btn-copy.copied {
+        border-color: var(--success-green);
+        background-color: var(--success-green);
+        color: #fff;
+      }
+
+      .output-field {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: var(--light-gray);
+        font-family: monospace;
+        font-size: 0.85rem;
+        color: var(--dark-gray);
+      }
+
+      textarea.output-field {
+        min-height: 120px;
+        line-height: 1.4;
+      }
+
+      .badge {
+        font-size: 0.75rem;
+        background-color: var(--primary-blue);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>エラーチケット フォーマット</h1>
+
+      <div class="input-section">
+        <label for="logInput">Input Error Logs</label>
+        <textarea
+          id="logInput"
+          placeholder="複数のエラーログをここに貼り付けてください..."
+        ></textarea>
+        <button class="btn-primary" onclick="processLogs()">
+          変換を実行する
+        </button>
+      </div>
+
+      <div id="resultsArea"></div>
+    </div>
+
+    <script>
+      function processLogs() {
+        const logInput = document.getElementById("logInput");
+        const logText = logInput.value.trim();
+
+        if (!logText) {
+          alert("ログを入力してください");
+          return;
+        }
+
+        const resultsArea = document.getElementById("resultsArea");
+        resultsArea.innerHTML = "";
+
+        const groups = generateErrorGroups(logText);
+
+        if (groups.size === 0) {
+          resultsArea.innerHTML =
+            "<p style='text-align:center; color:#6c757d;'>有効なエラーログが見つかりませんでした。</p>";
+          return;
+        }
+
+        groups.forEach((group) => {
+          createResultCard(group);
+        });
+      }
+
+      function generateErrorGroups(logText) {
+        const allLines = logText.split(/\r?\n/);
+        const blocks = [];
+        let currentBlock = [];
+
+        for (let i = 0; i < allLines.length; i++) {
+          const line = allLines[i];
+          if (line.startsWith("mail_subject:")) {
+            if (currentBlock.length > 0) {
+              const lastLine = currentBlock.pop();
+              blocks.push([...currentBlock]);
+              currentBlock = [lastLine, line];
+            } else {
+              currentBlock.push(line);
+            }
+          } else {
+            currentBlock.push(line);
+          }
+        }
+        if (currentBlock.length > 0) blocks.push(currentBlock);
+
+        const groups = new Map();
+
+        blocks.forEach((lines) => {
+          const blockStr = lines.join("\n").trim();
+          if (!blockStr.includes("mail_subject:")) return;
+
+          const clientMatch = blockStr.match(/CLIENT_NO=([A-Z0-9_-]+)/);
+          const client = clientMatch ? clientMatch[1] : "";
+
+          let stackFirstLine = "Exception";
+          const exMatch = blockStr.match(
+            /^([A-Za-z0-9\.]+(Exception|Error).*)$/m,
+          );
+          if (exMatch) {
+            stackFirstLine = exMatch[1].trim();
+          }
+
+          const groupKey = `${client}|${stackFirstLine}`;
+
+          if (!groups.has(groupKey)) {
+            groups.set(groupKey, {
+              client,
+              exceptionLine: stackFirstLine,
+              items: [],
+            });
+          }
+          groups.get(groupKey).items.push(blockStr);
+        });
+
+        return groups;
+      }
+
+      function createResultCard(group) {
+        const resultsArea = document.getElementById("resultsArea");
+        const timestamps = new Set();
+        group.items.forEach((item) => {
+          const timeMatch = item.match(
+            /(\d{4}\/\d{2}\/\d{2})\s+(\d{2}:\d{2}:\d{2}\.\d{3})/,
+          );
+          if (timeMatch) timestamps.add(`${timeMatch[1]} ${timeMatch[2]}`);
+        });
+
+        const count = group.items.length;
+        const exName = group.exceptionLine.split(/[:\s]/)[0].split(".").pop();
+        const timeLabel = count > 1 ? "複数" : [...timestamps][0] || "不明";
+
+        const titleText = `【${group.client}】${exName}＠${timeLabel}${count > 1 ? "（" + count + "件）" : ""}`;
+        const firstPhrase = "ご確認をよろしくお願いいたします。\n起票者:\n\n";
+        const bodyContent = group.items
+          .map((item, idx) => {
+            const content = idx === 0 ? item : shrinkError(item);
+            return `{code}\n${content}\n{/code}`;
+          })
+          .join("\n\n");
+        const bodyText = firstPhrase + bodyContent;
+
+        const card = document.createElement("div");
+        card.className = "result-card";
+        card.innerHTML = `
+          <div class="card-header">
+            <h3>${group.client} <span style="color:#6c757d; font-weight:normal; margin: 0 8px;">/</span> ${exName}</h3>
+            <span class="badge">${count}件のエラー</span>
+          </div>
+          <div class="card-body">
+            <div class="copy-group">
+              <div class="field-header">
+                <label>Title</label>
+                <button class="btn-copy" onclick="copyToClipboard(this)">COPY</button>
+              </div>
+              <input type="text" class="output-field" value="${titleText}" readonly>
+            </div>
+            <div class="copy-group">
+              <div class="field-header">
+                <label>Body</label>
+                <button class="btn-copy" onclick="copyToClipboard(this)">COPY</button>
+              </div>
+              <textarea class="output-field" readonly>${bodyText}</textarea>
+            </div>
+          </div>
+        `;
+        resultsArea.appendChild(card);
+      }
+
+      function shrinkError(err) {
+        const lines = err.split(/\r?\n/);
+        const res = [];
+        let req = "";
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].includes("REQUEST:")) req = lines[i].trim();
+          if (i < 10) res.push(lines[i]);
+        }
+        if (req && !res.includes(req)) res.push("...", req);
+        return res.join("\n");
+      }
+
+      async function copyToClipboard(button) {
+        const field = button
+          .closest(".copy-group")
+          .querySelector(".output-field");
+        try {
+          await navigator.clipboard.writeText(field.value);
+          const originalText = button.innerText;
+          button.innerText = "COPIED!";
+          button.classList.add("copied");
+
+          setTimeout(() => {
+            button.innerText = originalText;
+            button.classList.remove("copied");
+          }, 1500);
+        } catch (err) {
+          console.error("Copy failed", err);
+        }
+      }
+    </script>
+  </body>
+</html>
