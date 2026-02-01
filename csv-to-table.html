@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="utf-8" />
+    <title>CSV → Table 変換ツール</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        padding: 30px;
+        background: #f9fafb;
+      }
+
+      .action-row {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .format-selector {
+        background: #fff;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        display: flex;
+        gap: 15px;
+      }
+
+      .btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        cursor: pointer;
+      }
+
+      .btn:hover {
+        background: #0056b3;
+      }
+
+      #output {
+        width: 100%;
+        height: 400px;
+        padding: 10px;
+        font-family: monospace;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        resize: vertical;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>📄 CSV → Table 変換ツール</h2>
+
+    <div class="action-row">
+      <input type="file" id="csvFile" accept=".csv" />
+
+      <div class="format-selector">
+        <strong>出力形式:</strong>
+        <label><input type="radio" name="format" value="markdown" checked> Markdown</label>
+        <label><input type="radio" name="format" value="backlog"> Backlog</label>
+      </div>
+
+      <button class="btn" id="convertBtn">変換する</button>
+      <button class="btn" id="downloadBtn" style="display: none">
+        ダウンロード
+      </button>
+    </div>
+
+    <h3>出力結果</h3>
+    <textarea id="output" readonly></textarea>
+
+    <script>
+      document.getElementById("convertBtn").addEventListener("click", async () => {
+        const fileInput = document.getElementById("csvFile");
+        const output = document.getElementById("output");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const format = document.querySelector('input[name="format"]:checked').value;
+
+        if (!fileInput.files.length) {
+          alert("CSVファイルを選択してください。");
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+
+        // Shift_JISでデコード
+        const decoder = new TextDecoder("shift-jis");
+        const text = decoder.decode(arrayBuffer);
+
+        // 区切り文字自動判定
+        const delimiter = text.includes("\t") ? "\t" : ",";
+
+        // CSVを行ごとに分割
+        let rows = text
+          .trim()
+          .split(/\r?\n/)
+          .map((line) => line.split(delimiter));
+
+        // 【追加】1行目が CLIENT_NO で始まる場合は削除
+        if (rows.length > 0 && rows[0][0].replace(/^"|"$/g, "").trim() === "CLIENT_NO") {
+          rows.shift();
+        }
+
+        // NaNや空欄を "null" に置換 ＋ ダブルクオート削除
+        const cleanRows = rows.map((row) =>
+          row.map((cell) => {
+            const trimmed = cell.trim();
+            if (trimmed === "") return "null";
+            return trimmed.replace(/^"|"$/g, "");
+          })
+        );
+
+        if (cleanRows.length === 0) return;
+
+        const headers = cleanRows[0];
+        const dataRows = cleanRows.slice(1);
+        let result = "";
+
+        if (format === "markdown") {
+          // Markdown
+          result += `| ${headers.join(" | ")} |\n`;
+          result += `|${headers.map(() => "---").join("|")}|\n`;
+          dataRows.forEach((row) => {
+            result += `| ${row.join(" | ")} |\n`;
+          });
+        } else {
+          // Backlog (ヘッダ末尾に h)
+          result += `| ${headers.join(" | ")} |h\n`;
+          dataRows.forEach((row) => {
+            result += `| ${row.join(" | ")} |\n`;
+          });
+        }
+
+        output.value = result;
+        downloadBtn.style.display = "inline-block";
+      });
+
+      document.getElementById("downloadBtn").addEventListener("click", () => {
+        const text = document.getElementById("output").value;
+        const format = document.querySelector('input[name="format"]:checked').value;
+        const blob = new Blob([text], {
+          type: "text/plain;charset=utf-8"
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `output_${format}.txt`;
+        link.click();
+      });
+    </script>
+  </body>
+
+</html>
