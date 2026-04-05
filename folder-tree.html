@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Visualizer Pro (React)</title>
+    <!-- React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Libraries -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --bg-color: #f8f9fa;
+            --container-bg: #fff;
+            --text-main: #333;
+            --text-muted: #95a5a6;
+            --border-color: #eee;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--container-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        /* Guide Styles */
+        .guide-box {
+            background: #fcfcfc;
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #555;
+        }
+        .guide-box strong { color: #2c3e50; display: block; margin-bottom: 5px; }
+        .guide-box ul { margin: 0; padding-left: 20px; }
+
+        .input-section {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .history-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .history-controls select {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            color: #666;
+            outline: none;
+            max-width: 250px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        textarea:focus { border-color: var(--primary-color); }
+        textarea.dragover { border-color: #2ecc71; background: #f0fff4; }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background-color: var(--primary-color); color: #fff; }
+        .btn-primary:hover { background-color: #2980b9; }
+        .btn-secondary { background-color: #ecf0f1; color: #2c3e50; }
+        .btn-secondary:hover { background-color: #bdc3c7; }
+        .btn-success { background-color: #2ecc71; color: #fff; }
+        .btn-success:hover { background-color: #27ae60; }
+
+        #treeOutputContainer {
+            margin-top: 30px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            background: #fff;
+            border-radius: 8px;
+            overflow-x: auto;
+            min-height: 100px;
+        }
+
+        /* Tree Styles */
+        .tree-container {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #444;
+            background: #fff;
+        }
+        .tree-node {
+            position: relative;
+            padding-left: 24px;
+            white-space: nowrap;
+        }
+        .tree-node::before {
+            content: '';
+            position: absolute; left: 0; top: 0; bottom: 0;
+            width: 1px; background-color: #ccc;
+        }
+        .tree-node:last-child::before { height: 14px; }
+        .tree-node::after {
+            content: '';
+            position: absolute; left: 0; top: 14px;
+            width: 18px; height: 1px; background-color: #ccc;
+        }
+        .tree-root > .tree-node::before, 
+        .tree-root > .tree-node::after { display: none; }
+        .tree-root > .tree-node { padding-left: 0; }
+
+        .node-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: default;
+            transition: background 0.1s;
+        }
+        .node-content:hover { background: #f0f7ff; }
+        
+        .folder-toggle {
+            cursor: pointer;
+            width: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+            font-size: 10px;
+            color: #ccc;
+        }
+        .collapsed .folder-toggle { transform: rotate(-90deg); }
+        .collapsed .tree-children { display: none; }
+
+        .node-icon {
+            display: flex; align-items: center; justify-content: center;
+            width: 22px; font-size: 18px;
+        }
+        .icon-folder-svg { fill: #f1c40f; width: 18px; height: 18px; }
+        
+        .node-memo {
+            margin-left: 15px; color: var(--text-muted);
+            font-size: 12px; font-family: sans-serif;
+            border-left: 1px solid #eee; padding-left: 10px;
+        }
+        .tree-children { margin-left: 18px; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #333; color: #fff; padding: 10px 20px;
+            border-radius: 4px; opacity: 0; transition: opacity 0.3s;
+            pointer-events: none; z-index: 1000;
+        }
+        .toast.visible { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        const FOLDER_SVG = (
+            <svg className="icon-folder-svg" viewBox="0 0 24 24">
+                <path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
+            </svg>
+        );
+
+        const STORAGE_KEY = 'tree_visualizer_last_input';
+        const HISTORY_KEY = 'tree_visualizer_history';
+
+        // --- Helper Functions ---
+
+        const getIcon = (name, isFolder) => {
+            if (isFolder) return <span>{FOLDER_SVG}</span>;
+            
+            const ext = name.split('.').pop().toLowerCase();
+            const devicons = {
+                'js': 'devicon-javascript-plain colored', 'ts': 'devicon-typescript-plain colored',
+                'py': 'devicon-python-plain colored', 'java': 'devicon-java-plain colored',
+                'cpp': 'devicon-cplusplus-plain colored', 'c': 'devicon-c-plain colored',
+                'css': 'devicon-css3-plain colored', 'go': 'devicon-go-original-wordmark colored',
+                'php': 'devicon-php-plain colored', 'rb': 'devicon-ruby-plain colored',
+                'rs': 'devicon-rust-plain colored', 'swift': 'devicon-swift-plain colored',
+                'json': 'devicon-json-plain colored'
+            };
+
+            if (devicons[ext]) return <i className={devicons[ext]}></i>;
+            if (ext === 'html' || ext === 'htm') return <i className="lab la-html5" style={{color:'#e67e22'}}></i>;
+            if (['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp'].includes(ext)) return <i className="las la-image" style={{color:'#2ecc71'}}></i>;
+            if (ext === 'pdf') return <i className="las la-file-pdf" style={{color:'#e74c3c'}}></i>;
+            if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) return <i className="las la-file-archive" style={{color:'#9b59b6'}}></i>;
+            if (ext === 'md' || ext === 'txt') return <i className="las la-file-alt" style={{color:'#34495e'}}></i>;
+            return <i className="las la-file"></i>;
+        };
+
+        const parseTree = (input) => {
+            if (!input.trim()) return [];
+            const lines = input.split('\n');
+            const rootNodes = [];
+            let stack = [];
+
+            lines.forEach(line => {
+                if (!line.trim() || line.match(/^\d+ director/)) return;
+
+                const match = line.match(/^([│├└─\s\t]*)(.*)$/);
+                if (!match) return;
+                
+                const indentStr = match[1].replace(/\t/g, '    ');
+                const content = match[2].trim();
+                if (!content) return;
+
+                const currentIndentLen = indentStr.length;
+
+                let name = content, memo = "";
+                const memoMatch = content.match(/^(.*?)(?:\s+#\s*|\s+\/\/\s*)(.*)$/);
+                if (memoMatch) {
+                    name = memoMatch[1].trim();
+                    memo = memoMatch[2].trim();
+                }
+
+                // Heuristic: Names without dots are folders
+                const isFolderByName = !name.includes('.') || name === '.' || name === '..';
+                const node = { id: Math.random().toString(36).substr(2, 9), name, memo, children: [], isFolder: isFolderByName };
+
+                if (stack.length === 0 || currentIndentLen === 0) {
+                    rootNodes.push(node);
+                    stack = [{ len: currentIndentLen, node: node }];
+                } else {
+                    while (stack.length > 0 && stack[stack.length - 1].len >= currentIndentLen) {
+                        stack.pop();
+                    }
+
+                    if (stack.length > 0) {
+                        const parentObj = stack[stack.length - 1];
+                        parentObj.node.children.push(node);
+                        parentObj.node.isFolder = true;
+                        stack.push({ len: currentIndentLen, node: node });
+                    } else {
+                        rootNodes.push(node);
+                        stack = [{ len: currentIndentLen, node: node }];
+                    }
+                }
+            });
+            return rootNodes;
+        };
+
+        const buildTextTree = (nodes, indent = "") => {
+            let result = "";
+            nodes.forEach((node, index) => {
+                const isLast = index === nodes.length - 1;
+                const marker = isLast ? "└── " : "├── ";
+                result += indent + marker + node.name + (node.memo ? " # " + node.memo : "") + "\n";
+                if (node.children.length > 0) {
+                    result += buildTextTree(node.children, indent + (isLast ? "    " : "│   "));
+                }
+            });
+            return result;
+        };
+
+        // --- Components ---
+
+        const TreeNode = ({ node, isLast }) => {
+            const [isCollapsed, setIsCollapsed] = useState(false);
+            const hasChildren = node.children && node.children.length > 0;
+
+            return (
+                <div className={`tree-node ${isCollapsed ? 'collapsed' : ''}`}>
+                    <div className="node-content">
+                        {node.isFolder ? (
+                            <span 
+                                className="folder-toggle" 
+                                onClick={(e) => { e.stopPropagation(); setIsCollapsed(!isCollapsed); }}
+                            >
+                                {hasChildren ? '▼' : ' '}
+                            </span>
+                        ) : (
+                            <span style={{ width: '14px' }}></span>
+                        )}
+                        <span className="node-icon">{getIcon(node.name, node.isFolder)}</span>
+                        <span className="node-name">{node.name}</span>
+                        {node.memo && <span className="node-memo">{node.memo}</span>}
+                    </div>
+                    {hasChildren && (
+                        <div className="tree-children">
+                            {node.children.map((child, idx) => (
+                                <TreeNode 
+                                    key={child.id} 
+                                    node={child} 
+                                    isLast={idx === node.children.length - 1} 
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [input, setInput] = useState('');
+            const [history, setHistory] = useState([]);
+            const [treeData, setTreeData] = useState([]);
+            const [toast, setToast] = useState({ message: '', visible: false });
+            const [isDragOver, setIsDragOver] = useState(false);
+            const treeRef = useRef(null);
+
+            // Init
+            useEffect(() => {
+                const savedInput = localStorage.getItem(STORAGE_KEY);
+                const savedHistory = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+                setHistory(savedHistory);
+                
+                const initialInput = savedInput || `.
+├── src # ソースコード
+│ ├── components // UIコンポーネント
+│ │ └── Header.js # ヘッダー
+│ │ └── style.css # スタイル
+│ ├── index.html # メイン
+│ └── api.py # バックエンド
+└── README.md # 説明書`;
+                
+                setInput(initialInput);
+                setTreeData(parseTree(initialInput));
+            }, []);
+
+            const showToast = (message) => {
+                setToast({ message, visible: true });
+                setTimeout(() => setToast({ message: '', visible: false }), 2000);
+            };
+
+            const handleVisualize = useCallback(() => {
+                const newTree = parseTree(input);
+                setTreeData(newTree);
+                localStorage.setItem(STORAGE_KEY, input);
+
+                if (input.trim()) {
+                    setHistory(prev => {
+                        if (prev[0] === input) return prev;
+                        const newHistory = [input, ...prev.filter(h => h !== input)].slice(0, 10);
+                        localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+                        return newHistory;
+                    });
+                }
+            }, [input]);
+
+            const handleLoadHistory = (idx) => {
+                if (idx === "") return;
+                const selected = history[idx];
+                if (selected) {
+                    setInput(selected);
+                    setTreeData(parseTree(selected));
+                }
+            };
+
+            const handleCopyMarkdown = () => {
+                const text = buildTextTree(treeData);
+                navigator.clipboard.writeText('```\n' + text + '\n```')
+                    .then(() => showToast('Markdownをコピーしました！'));
+            };
+
+            const handleCopyPNG = () => {
+                if (!treeRef.current) return;
+                html2canvas(treeRef.current, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+                    canvas.toBlob(blob => {
+                        const item = new ClipboardItem({ "image/png": blob });
+                        navigator.clipboard.write([item]).then(() => {
+                            showToast('画像をコピーしました！');
+                        }).catch(() => showToast('画像のコピーに失敗しました。'));
+                    });
+                });
+            };
+
+            const handleDownloadPNG = () => {
+                html2canvas(treeRef.current, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = 'folder-tree.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                });
+            };
+
+            const handleDownloadMarkdown = () => {
+                const text = buildTextTree(treeData);
+                const blob = new Blob(['```\n' + text + '\n```'], { type: 'text/markdown' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'folder-tree.md';
+                link.click();
+            };
+
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setIsDragOver(false);
+                const file = e.dataTransfer.files[0];
+                if (file && (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        setInput(ev.target.result);
+                        setTreeData(parseTree(ev.target.result));
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            return (
+                <div className="container">
+                    <h1>フォルダ構成図作成ツール</h1>
+                    
+                    <div className="guide-box">
+                        <strong>📖 使い方ガイド</strong>
+                        <ul>
+                            <li><strong>生成:</strong> <code>tree</code> コマンドの結果を貼り付け、「Generate Tree」を押します。</li>
+                            <li><strong>メモ:</strong> <code>#</code> や <code>//</code> で説明を追加できます。</li>
+                            <li><strong>履歴:</strong> 過去10件の入力を自動保存します。</li>
+                            <li><strong>出力:</strong> PNG画像やMarkdown形式での保存・コピーが可能です。</li>
+                            <li><strong>操作:</strong> フォルダ名クリックで階層を開閉できます。</li>
+                        </ul>
+                    </div>
+
+                    <div className="input-section">
+                        <div className="history-controls">
+                            <span style={{ fontSize: '12px', color: '#888' }}>履歴から読み込む:</span>
+                            <select onChange={(e) => handleLoadHistory(e.target.value)}>
+                                <option value="">-- 過去の入力を選択 --</option>
+                                {history.map((h, i) => (
+                                    <option key={i} value={i}>
+                                        {`[${i+1}] ${h.split('\n')[0].substring(0, 30)}...`}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <textarea 
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                            onDragLeave={() => setIsDragOver(false)}
+                            onDrop={handleDrop}
+                            className={isDragOver ? 'dragover' : ''}
+                            placeholder="ここにtreeコマンドの結果を貼り付けるか、ファイルをドロップしてください..."
+                        />
+                        
+                        <div className="controls">
+                            <button className="btn-primary" onClick={handleVisualize}>
+                                <i className="las la-sync"></i> Generate Tree
+                            </button>
+                            
+                            <div className="button-group">
+                                <button className="btn-success" onClick={handleCopyPNG}>
+                                    <i className="las la-image"></i> Copy PNG
+                                </button>
+                                <button className="btn-success" onClick={handleCopyMarkdown}>
+                                    <i className="las la-copy"></i> Copy Markdown
+                                </button>
+                                <button className="btn-secondary" onClick={handleDownloadPNG}>PNG</button>
+                                <button className="btn-secondary" onClick={handleDownloadMarkdown}>Markdown</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="treeOutputContainer" ref={treeRef}>
+                        <div className="tree-container tree-root">
+                            {treeData.map((node, idx) => (
+                                <TreeNode key={node.id} node={node} isLast={idx === treeData.length - 1} />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={`toast ${toast.visible ? 'visible' : ''}`}>
+                        {toast.message}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
