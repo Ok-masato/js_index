@@ -144,6 +144,7 @@
             line-height: 1.8;
             color: #222;
             background: #fff;
+            font-weight: bold;
         }
         .tree-node {
             position: relative;
@@ -153,13 +154,13 @@
         .tree-node::before {
             content: '';
             position: absolute; left: 0; top: 0; bottom: 0;
-            width: 1px; background-color: #999;
+            width: 2px; background-color: #888;
         }
         .tree-node:last-child::before { height: 14px; }
         .tree-node::after {
             content: '';
             position: absolute; left: 0; top: 14px;
-            width: 18px; height: 1px; background-color: #999;
+            width: 18px; height: 2px; background-color: #888;
         }
         .tree-root > .tree-node::before, 
         .tree-root > .tree-node::after { display: none; }
@@ -184,7 +185,7 @@
             justify-content: center;
             transition: transform 0.2s;
             font-size: 10px;
-            color: #888;
+            color: #666;
         }
         .collapsed .folder-toggle { transform: rotate(-90deg); }
         .collapsed .tree-children { display: none; }
@@ -198,7 +199,8 @@
         .node-memo {
             margin-left: 15px; color: var(--text-muted);
             font-size: 12px; font-family: sans-serif;
-            border-left: 1px solid #eee; padding-left: 10px;
+            border-left: 2px solid #888; padding-left: 10px;
+            font-weight: bold;
         }
         .tree-children { margin-left: 18px; }
 
