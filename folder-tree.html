@@ -18,8 +18,8 @@
             --primary-color: #3498db;
             --bg-color: #f8f9fa;
             --container-bg: #fff;
-            --text-main: #333;
-            --text-muted: #95a5a6;
+            --text-main: #222;
+            --text-muted: #333;
             --border-color: #eee;
         }
 
@@ -53,7 +53,7 @@
             margin-bottom: 25px;
             font-size: 13px;
             line-height: 1.6;
-            color: #555;
+            color: #444;
         }
         .guide-box strong { color: #2c3e50; display: block; margin-bottom: 5px; }
         .guide-box ul { margin: 0; padding-left: 20px; }
@@ -73,7 +73,7 @@
             font-size: 13px;
             border-radius: 6px;
             border: 1px solid #ddd;
-            color: #666;
+            color: #444;
             outline: none;
             max-width: 250px;
         }
@@ -90,6 +90,7 @@
             resize: vertical;
             transition: border-color 0.2s;
             outline: none;
+            color: #1a1a1a;
         }
         textarea:focus { border-color: var(--primary-color); }
         textarea.dragover { border-color: #2ecc71; background: #f0fff4; }
@@ -141,7 +142,7 @@
             font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.8;
-            color: #444;
+            color: #222;
             background: #fff;
         }
         .tree-node {
@@ -152,13 +153,13 @@
         .tree-node::before {
             content: '';
             position: absolute; left: 0; top: 0; bottom: 0;
-            width: 1px; background-color: #ccc;
+            width: 1px; background-color: #999;
         }
         .tree-node:last-child::before { height: 14px; }
         .tree-node::after {
             content: '';
             position: absolute; left: 0; top: 14px;
-            width: 18px; height: 1px; background-color: #ccc;
+            width: 18px; height: 1px; background-color: #999;
         }
         .tree-root > .tree-node::before, 
         .tree-root > .tree-node::after { display: none; }
@@ -183,7 +184,7 @@
             justify-content: center;
             transition: transform 0.2s;
             font-size: 10px;
-            color: #ccc;
+            color: #888;
         }
         .collapsed .folder-toggle { transform: rotate(-90deg); }
         .collapsed .tree-children { display: none; }
