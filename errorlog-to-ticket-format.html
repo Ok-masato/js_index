@@ -324,7 +324,7 @@
         const timeLabel = count > 1 ? "複数" : [...timestamps][0] || "不明";
 
         const titleText = `【${group.client}】${exName}＠${timeLabel}${count > 1 ? "（" + count + "件）" : ""}`;
-        const firstPhrase = "ご確認をよろしくお願いいたします。\n起票者:\n\n";
+        const firstPhrase = "ご確認をよろしくお願いいたします。\n起票者:\n";
         const bodyContent = group.items
           .map((item, idx) => {
             const content = idx === 0 ? item : shrinkError(item);
