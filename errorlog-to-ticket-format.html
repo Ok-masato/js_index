@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="ja">
+
   <head>
     <meta charset="UTF-8" />
     <title>Log to Ticket Converter</title>
@@ -194,16 +195,14 @@
       }
     </style>
   </head>
+
   <body>
     <div class="container">
       <h1>エラーチケット フォーマット</h1>
 
       <div class="input-section">
         <label for="logInput">Input Error Logs</label>
-        <textarea
-          id="logInput"
-          placeholder="複数のエラーログをここに貼り付けてください..."
-        ></textarea>
+        <textarea id="logInput" placeholder="複数のエラーログをここに貼り付けてください..."></textarea>
         <button class="btn-primary" onclick="processLogs()">
           変換を実行する
         </button>
@@ -238,31 +237,45 @@
         });
       }
 
+      /**
+       * HTML特殊文字をエスケープする
+       */
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      /**
+       * ログテキストを mail_subject: を区切りとして1件単位のブロックに分割し、
+       * CLIENT_NO と Exception 種別でグループ化する。
+       * ※ Java側の FileAccessService#outputTargetFile と同じ分割ロジックを採用:
+       *    mail_subject: 行が新しいログエントリの先頭を示す。
+       */
       function generateErrorGroups(logText) {
         const allLines = logText.split(/\r?\n/);
         const blocks = [];
         let currentBlock = [];
 
-        for (let i = 0; i < allLines.length; i++) {
-          const line = allLines[i];
-          if (line.startsWith("mail_subject:")) {
-            if (currentBlock.length > 0) {
-              const lastLine = currentBlock.pop();
-              blocks.push([...currentBlock]);
-              currentBlock = [lastLine, line];
-            } else {
-              currentBlock.push(line);
-            }
-          } else {
-            currentBlock.push(line);
+        for (const line of allLines) {
+          // mail_subject: 行が見つかり、かつ直前のブロックが存在する場合は確定させる
+          if (line.startsWith("mail_subject:") && currentBlock.length > 0) {
+            blocks.push([...currentBlock]);
+            currentBlock = [];
           }
+          currentBlock.push(line);
         }
+        // 末尾ブロックを確定
         if (currentBlock.length > 0) blocks.push(currentBlock);
 
         const groups = new Map();
 
         blocks.forEach((lines) => {
           const blockStr = lines.join("\n").trim();
+          // mail_subject: を含まないブロック（先頭の不完全行など）は除外
           if (!blockStr.includes("mail_subject:")) return;
 
           const clientMatch = blockStr.match(/CLIENT_NO=([A-Z0-9_-]+)/);
@@ -291,6 +304,11 @@
         return groups;
       }
 
+      /**
+       * グループ情報から結果カードを生成してDOMに追加する。
+       * innerHTML への値セットは escapeHtml でXSSを防止し、
+       * input/textarea の value は DOM プロパティ経由で安全に設定する。
+       */
       function createResultCard(group) {
         const resultsArea = document.getElementById("resultsArea");
         const timestamps = new Set();
@@ -317,9 +335,11 @@
 
         const card = document.createElement("div");
         card.className = "result-card";
+        // XSS対策: innerHTML に埋め込む文字列は必ず escapeHtml を通す
+        // input/textarea の value は innerHTML ではなく DOM プロパティで設定する
         card.innerHTML = `
           <div class="card-header">
-            <h3>${group.client} <span style="color:#6c757d; font-weight:normal; margin: 0 8px;">/</span> ${exName}</h3>
+            <h3>${escapeHtml(group.client)} <span style="color:#6c757d; font-weight:normal; margin: 0 8px;">/</span> ${escapeHtml(exName)}</h3>
             <span class="badge">${count}件のエラー</span>
           </div>
           <div class="card-body">
@@ -328,20 +348,27 @@
                 <label>Title</label>
                 <button class="btn-copy" onclick="copyToClipboard(this)">COPY</button>
               </div>
-              <input type="text" class="output-field" value="${titleText}" readonly>
+              <input type="text" class="output-field" readonly>
             </div>
             <div class="copy-group">
               <div class="field-header">
                 <label>Body</label>
                 <button class="btn-copy" onclick="copyToClipboard(this)">COPY</button>
               </div>
-              <textarea class="output-field" readonly>${bodyText}</textarea>
+              <textarea class="output-field" readonly></textarea>
             </div>
           </div>
         `;
+        card.querySelector("input.output-field").value = titleText;
+        card.querySelector("textarea.output-field").value = bodyText;
+
         resultsArea.appendChild(card);
       }
 
+      /**
+       * 2件目以降のエラーログを先頭10行 + REQUEST行に圧縮する。
+       * ※ res は trim 前の行を保持するため、REQUEST行との比較は trim() して行う。
+       */
       function shrinkError(err) {
         const lines = err.split(/\r?\n/);
         const res = [];
@@ -350,7 +377,7 @@
           if (lines[i].includes("REQUEST:")) req = lines[i].trim();
           if (i < 10) res.push(lines[i]);
         }
-        if (req && !res.includes(req)) res.push("...", req);
+        if (req && !res.some((l) => l.trim() === req)) res.push("...", req);
         return res.join("\n");
       }
 
@@ -374,4 +401,5 @@
       }
     </script>
   </body>
+
 </html>
