@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>SQL生成ツール (INSERT/UPDATE)</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                margin: 20px;
+                background-color: #f9f9f9;
+            }
+
+            .container {
+                max-width: 900px;
+                margin: 0 auto;
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 8px;
+                font-weight: bold;
+            }
+
+            input[type="text"],
+            input[type="file"] {
+                width: 100%;
+                padding: 10px;
+                box-sizing: border-box;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            .radio-group {
+                margin-bottom: 15px;
+                display: flex;
+                gap: 20px;
+                border: 1px solid #eee;
+                padding: 10px;
+                border-radius: 4px;
+            }
+
+            .radio-group label {
+                display: inline;
+                font-weight: normal;
+                cursor: pointer;
+            }
+
+            textarea {
+                width: 100%;
+                height: 350px;
+                padding: 10px;
+                box-sizing: border-box;
+                font-family: monospace;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                resize: vertical;
+                white-space: pre-wrap;
+            }
+
+            button {
+                padding: 12px 24px;
+                background-color: #28a745;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+            button:hover {
+                background-color: #218838;
+            }
+
+            h2 {
+                border-bottom: 2px solid #28a745;
+                padding-bottom: 10px;
+                color: #333;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="container">
+            <h2>CSVからSQL生成 (INSERT/UPDATE)</h2>
+
+            <div class="form-group">
+                <label for="tableName">テーブル名</label>
+                <input type="text" id="tableName" placeholder="例: hanpukai_course">
+            </div>
+
+            <div class="form-group">
+                <label>生成するSQLの種類</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="sqlType" value="UPDATE" checked> UPDATE文</label>
+                    <label><input type="radio" name="sqlType" value="INSERT"> INSERT文</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="csvFile">CSVファイル (Shift-JIS)</label>
+                <input type="file" id="csvFile" accept=".csv">
+            </div>
+
+            <button onclick="generateSql()">SQLを生成する</button>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label for="output">出力結果</label>
+                <textarea id="output" readonly placeholder="ここに生成されたSQLが表示されます..."></textarea>
+            </div>
+        </div>
+
+        <script>
+            // CSVパーサー
+            function parseCSV(text) {
+                const result = [];
+                let row = [];
+                let cell = '';
+                let inQuotes = false;
+
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    const nextChar = text[i + 1];
+
+                    if (inQuotes) {
+                        if (char === '"' && nextChar === '"') {
+                            cell += '"';
+                            i++;
+                        } else if (char === '"') {
+                            inQuotes = false;
+                        } else {
+                            cell += char;
+                        }
+                    } else {
+                        if (char === '"') {
+                            inQuotes = true;
+                        } else if (char === ',') {
+                            row.push(cell);
+                            cell = '';
+                        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+                            row.push(cell);
+                            result.push(row);
+                            row = [];
+                            cell = '';
+                            if (char === '\r') i++;
+                        } else {
+                            cell += char;
+                        }
+                    }
+                }
+                if (cell || row.length > 0) {
+                    row.push(cell);
+                    result.push(row);
+                }
+                return result;
+            }
+
+            function generateSql() {
+                const tableName = document.getElementById('tableName').value.trim();
+                const fileInput = document.getElementById('csvFile');
+                const output = document.getElementById('output');
+                const sqlType = document.querySelector('input[name="sqlType"]:checked').value;
+
+                if (!tableName) {
+                    alert('テーブル名を入力してください。');
+                    return;
+                }
+                if (fileInput.files.length === 0) {
+                    alert('CSVファイルを選択してください。');
+                    return;
+                }
+
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const text = e.target.result;
+                    const rows = parseCSV(text);
+
+                    if (rows.length < 2) {
+                        alert('データが不足しています。');
+                        return;
+                    }
+
+                    // ヘッダー行の特定（列数が一番多い行を探す）
+                    let headerIndex = 0;
+                    let maxCols = 0;
+                    for (let i = 0; i < Math.min(5, rows.length); i++) {
+                        if (rows[i].length > maxCols) {
+                            maxCols = rows[i].length;
+                            headerIndex = i;
+                        }
+                    }
+
+                    const headers = rows[headerIndex].map(h => h.trim());
+                    let sqlStatements = [];
+
+                    for (let i = headerIndex + 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (row.length === 0 || (row.length === 1 && row[0].trim() === '')) continue;
+
+                        let currentValues = [];
+                        let setClauses = [];
+                        let valueClauses = [];
+
+                        for (let j = 0; j < headers.length; j++) {
+                            const colName = headers[j];
+                            if (!colName) continue;
+
+                            let value = row[j];
+                            let formattedValue = '';
+
+                            if (value === undefined || value === '') {
+                                formattedValue = 'null';
+                            } else {
+                                // エスケープ処理
+                                const escaped = value.replace(/'/g, "''");
+                                formattedValue = `'${escaped}'`;
+                            }
+
+                            setClauses.push(`${colName}=${formattedValue}`);
+                            valueClauses.push(formattedValue);
+                        }
+
+                        if (sqlType === 'UPDATE') {
+                            // update テーブル名 set カラム=値, ...
+                            const sql = `update ${tableName} set ${setClauses.join(', ')}`;
+                            sqlStatements.push(sql);
+                            sqlStatements.push('/');
+                        } else {
+                            // insert into テーブル名 (カラム, ...) values (値, ...)
+                            const sql =
+                                `insert into ${tableName} (${headers.join(', ')}) values (${valueClauses.join(', ')})`;
+                            sqlStatements.push(sql);
+                            sqlStatements.push('/');
+                        }
+                    }
+
+                    output.value = sqlStatements.join('\n');
+                };
+
+                // Shift-JISで読み込み
+                reader.readAsText(file, 'Shift_JIS');
+            }
+        </script>
+    </body>
+
+</html>
