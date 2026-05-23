@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>画像 OCR</title>
+    <script src="https://unpkg.com/tesseract.js@5/dist/tesseract.min.js"></script>
+    <link rel="stylesheet" href="cafe-common.css" />
+    <style>
+      .drop-zone {
+        border: 2px dashed var(--border);
+        border-radius: 10px;
+        padding: 40px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: var(--input-bg);
+        position: relative;
+      }
+      .drop-zone:hover,
+      .drop-zone.dragover {
+        border-color: var(--caramel);
+        background: var(--warning-bg);
+      }
+      .drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+      .drop-zone__icon {
+        font-size: 2.4rem;
+        margin-bottom: 12px;
+        opacity: 0.4;
+        line-height: 1;
+      }
+      .drop-zone__label {
+        font-size: 0.88rem;
+        color: var(--coffee);
+        font-weight: 400;
+      }
+      .drop-zone__sub {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+
+      /* Preview */
+      .preview-wrap {
+        display: none;
+        margin-top: 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--input-bg);
+        text-align: center;
+        padding: 12px;
+      }
+      .preview-wrap img {
+        max-width: 100%;
+        max-height: 320px;
+        border-radius: 4px;
+        display: block;
+        margin: 0 auto;
+      }
+      .preview-name {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 8px;
+      }
+
+      /* Progress */
+      .progress-wrap {
+        display: none;
+        margin-top: 20px;
+      }
+      .progress-status {
+        font-size: 0.78rem;
+        color: var(--muted);
+        margin-bottom: 8px;
+        letter-spacing: 0.04em;
+      }
+      .progress-bar-bg {
+        height: 4px;
+        background: var(--border);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        background: var(--caramel);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        width: 0%;
+      }
+
+      /* Output */
+      .output-wrap {
+        display: none;
+      }
+      .field-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .char-count {
+        font-size: 0.72rem;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+
+      /* Lang selector */
+      .lang-group {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .lang-btn {
+        padding: 6px 16px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: var(--input-bg);
+        color: var(--coffee);
+        font-family: inherit;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .lang-btn.active {
+        background: var(--espresso);
+        color: #FAF6F0;
+        border-color: var(--espresso);
+      }
+      .lang-btn:not(.active):hover {
+        border-color: var(--caramel);
+        color: var(--caramel);
+      }
+
+      /* Paste hint */
+      .paste-hint {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 10px;
+        letter-spacing: 0.03em;
+      }
+      kbd {
+        background: var(--border);
+        border-radius: 3px;
+        padding: 1px 6px;
+        font-size: 0.72rem;
+        font-family: monospace;
+        color: var(--coffee);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="page-nav">
+      <a class="page-nav__back" href="index.html">Tools</a>
+    </nav>
+
+    <div class="page-header">
+      <h1 class="page-header__title">画像 OCR</h1>
+      <p class="page-header__subtitle">画像内の文字を認識 — 完全ブラウザ処理</p>
+      <div class="page-header__divider"></div>
+    </div>
+
+    <div class="container">
+      <div class="card-section">
+        <div class="section-title">言語</div>
+        <div class="lang-group" id="langGroup">
+          <button class="lang-btn active" data-lang="jpn">日本語</button>
+          <button class="lang-btn" data-lang="eng">English</button>
+          <button class="lang-btn" data-lang="jpn+eng">日本語 + English</button>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-title">画像を選択</div>
+
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" accept="image/*" />
+          <div class="drop-zone__icon">◻</div>
+          <div class="drop-zone__label">クリックして画像を選択</div>
+          <div class="drop-zone__sub">またはドラッグ&ドロップ / <kbd>Cmd+V</kbd> で貼り付け</div>
+        </div>
+
+        <p class="paste-hint">スクリーンショットは <kbd>Cmd+V</kbd> で直接貼り付けできます</p>
+
+        <div class="preview-wrap" id="previewWrap">
+          <img id="previewImg" src="" alt="プレビュー" />
+          <div class="preview-name" id="previewName"></div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+          <div class="progress-status" id="progressStatus">読み込み中...</div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="runBtn" disabled>文字を認識する</button>
+      </div>
+
+      <div class="card-section output-wrap" id="outputWrap">
+        <div class="field-header">
+          <div class="section-title" style="margin:0;">認識結果</div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span class="char-count" id="charCount"></span>
+            <button class="btn-copy" id="copyBtn" onclick="copyResult()">COPY</button>
+          </div>
+        </div>
+        <textarea id="output" class="output-field" style="min-height:240px;" readonly></textarea>
+      </div>
+    </div>
+
+    <script>
+      let selectedLang = 'jpn';
+      let selectedFile = null;
+
+      // ===== 言語選択 =====
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedLang = btn.dataset.lang;
+        });
+      });
+
+      // ===== ファイル選択 =====
+      const fileInput = document.getElementById('fileInput');
+      const dropZone = document.getElementById('dropZone');
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files[0]) loadFile(fileInput.files[0]);
+      });
+
+      dropZone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) loadFile(file);
+      });
+
+      // ===== クリップボードから貼り付け =====
+      document.addEventListener('paste', e => {
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        for (const item of items) {
+          if (item.type.startsWith('image/')) {
+            loadFile(item.getAsFile());
+            break;
+          }
+        }
+      });
+
+      function loadFile(file) {
+        selectedFile = file;
+        const url = URL.createObjectURL(file);
+
+        const previewWrap = document.getElementById('previewWrap');
+        const previewImg = document.getElementById('previewImg');
+        const previewName = document.getElementById('previewName');
+
+        previewImg.src = url;
+        previewName.textContent = file.name || 'クリップボードから貼り付け';
+        previewWrap.style.display = 'block';
+
+        document.getElementById('runBtn').disabled = false;
+        document.getElementById('outputWrap').style.display = 'none';
+        document.getElementById('output').value = '';
+        document.getElementById('progressWrap').style.display = 'none';
+      }
+
+      // ===== OCR 実行 =====
+      document.getElementById('runBtn').addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        const runBtn = document.getElementById('runBtn');
+        const progressWrap = document.getElementById('progressWrap');
+        const progressStatus = document.getElementById('progressStatus');
+        const progressFill = document.getElementById('progressFill');
+        const outputWrap = document.getElementById('outputWrap');
+        const output = document.getElementById('output');
+
+        runBtn.disabled = true;
+        runBtn.textContent = '認識中...';
+        progressWrap.style.display = 'block';
+        outputWrap.style.display = 'none';
+
+        const statusMap = {
+          'loading tesseract core': 'エンジンを読み込み中',
+          'initializing tesseract': '初期化中',
+          'loading language traineddata': '言語データを読み込み中',
+          'initializing api': 'API を初期化中',
+          'recognizing text': '文字を認識中',
+        };
+
+        try {
+          const result = await Tesseract.recognize(
+            selectedFile,
+            selectedLang,
+            {
+              logger: m => {
+                progressStatus.textContent = statusMap[m.status] || m.status;
+                progressFill.style.width = (m.progress * 100).toFixed(0) + '%';
+              }
+            }
+          );
+
+          const text = result.data.text.trim();
+          output.value = text;
+          document.getElementById('charCount').textContent = `${text.length} 文字`;
+
+          progressWrap.style.display = 'none';
+          outputWrap.style.display = 'block';
+        } catch (err) {
+          progressStatus.textContent = 'エラーが発生しました: ' + err.message;
+          progressFill.style.width = '0%';
+          console.error(err);
+        } finally {
+          runBtn.disabled = false;
+          runBtn.textContent = '文字を認識する';
+        }
+      });
+
+      // ===== コピー =====
+      async function copyResult() {
+        const text = document.getElementById('output').value;
+        const btn = document.getElementById('copyBtn');
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'COPIED!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1500);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    </script>
+  </body>
+</html>
