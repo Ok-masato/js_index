@@ -3,308 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CSVエラー行削除ツール</title>
+    <title>CSV エラー行除去</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/encoding-japanese/2.0.0/encoding.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <link rel="stylesheet" href="cafe-common.css" />
     <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-          "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-      }
-
-      .container {
-        max-width: 1000px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        overflow: hidden;
-      }
-
-      .header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 30px;
-        text-align: center;
-      }
-
-      .header h1 {
-        font-size: 28px;
-        margin-bottom: 10px;
-      }
-
-      .header p {
-        opacity: 0.9;
-        font-size: 14px;
-      }
-
-      .content {
-        padding: 30px;
-      }
-
-      .section {
-        margin-bottom: 30px;
-      }
-
-      .section-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-      }
-
-      .section-title::before {
-        content: "";
-        display: inline-block;
-        width: 4px;
-        height: 20px;
-        background: #667eea;
-        margin-right: 10px;
-        border-radius: 2px;
-      }
-
-      .file-input-wrapper {
-        position: relative;
-        display: inline-block;
-        width: 100%;
-      }
-
-      .file-input-wrapper input[type="file"] {
-        display: none;
-      }
-
-      .file-input-label {
-        display: block;
-        padding: 20px;
-        background: #f8f9fa;
-        border: 2px dashed #667eea;
-        border-radius: 8px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-
-      .file-input-label:hover {
-        background: #e9ecef;
-        border-color: #764ba2;
-      }
-
-      .file-input-label.has-file {
-        background: #e7f3ff;
-        border-color: #2196f3;
-      }
-
-      textarea {
-        width: 100%;
-        min-height: 200px;
-        padding: 15px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-family: "Courier New", monospace;
-        font-size: 13px;
-        resize: vertical;
-        transition: border-color 0.3s;
-      }
-
-      textarea:focus {
-        outline: none;
-        border-color: #667eea;
-      }
-
-      .button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 16px;
-        font-weight: bold;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-        width: 100%;
-      }
-
-      .button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-      }
-
-      .button:disabled {
-        background: #ccc;
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      .info-box {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 20px;
-        font-size: 14px;
-      }
-
-      .result-box {
-        background: #d4edda;
-        border-left: 4px solid #28a745;
-        padding: 15px;
-        border-radius: 4px;
-        margin-top: 20px;
-        font-size: 14px;
-      }
-
-      .error-box {
-        background: #f8d7da;
-        border-left: 4px solid #dc3545;
-        padding: 15px;
-        border-radius: 4px;
-        margin-top: 20px;
-        font-size: 14px;
-      }
-
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 15px;
-        margin-top: 20px;
-      }
-
-      .stat-item {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        text-align: center;
-      }
-
-      .stat-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #667eea;
-      }
-
-      .stat-label {
-        font-size: 12px;
-        color: #666;
-        margin-top: 5px;
-      }
+      input[type="file"] { display: none; }
     </style>
   </head>
   <body>
+    <div class="page-header">
+      <h1 class="page-header__title">CSV エラー行除去</h1>
+      <p class="page-header__subtitle">エラーメッセージから該当行を自動削除</p>
+      <div class="page-header__divider"></div>
+    </div>
+
     <div class="container">
-      <div class="header">
-        <h1>📊 CSVエラー行削除ツール</h1>
-        <p>エラーメッセージから該当行を自動削除</p>
+      <div class="info-box">
+        <strong>使い方：</strong>
+        CSV ファイルを選択し、エラーメッセージを貼り付けてください。ヘッダー行の有無によって行番号の解釈が変わります。
       </div>
 
-      <div class="content">
-        <div class="info-box">
-          <strong>💡 使い方:</strong>
-          CSVファイルを選択し、エラーメッセージをペーストしてください。<br />
-          ヘッダー行の有無によって、エラーメッセージの行番号の解釈が変わります。
-        </div>
+      <div class="card-section">
+        <div class="section-title">1. CSV ファイルを選択</div>
 
-        <div class="section">
-          <div class="section-title">1. CSVファイルを選択</div>
-          <div class="file-input-wrapper">
-            <input type="file" id="csvFile" accept=".csv" />
-            <label for="csvFile" class="file-input-label" id="fileLabel">
-              <div style="font-size: 48px; margin-bottom: 10px">📁</div>
-              <div>クリックしてCSVファイルを選択</div>
-              <div style="font-size: 12px; color: #666; margin-top: 5px">
-                または、ここにファイルをドラッグ&ドロップ
-              </div>
+        <input type="file" id="csvFile" accept=".csv" />
+        <label for="csvFile" class="file-input-label" id="fileLabel">
+          <div style="font-size:2rem; margin-bottom:8px; opacity:0.5;">↑</div>
+          <div style="font-weight:400;">クリックして CSV ファイルを選択</div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:6px;">またはドラッグ&ドロップ</div>
+        </label>
+
+        <div style="margin-top:16px;">
+          <label style="margin-bottom:10px;">ヘッダー行の有無</label>
+          <div class="radio-group" style="flex-direction:column; gap:10px;">
+            <label>
+              <input type="radio" name="headerOption" value="withHeader" checked />
+              <span><strong style="font-weight:500;">ヘッダー行あり</strong> — エラーの行番号はデータ行の番号</span>
             </label>
-          </div>
-          <div
-            style="
-              padding: 15px;
-              background: #f8f9fa;
-              border-radius: 8px;
-              margin-top: 15px;
-            "
-          >
-            <div
-              style="font-weight: bold; margin-bottom: 10px; font-size: 14px"
-            >
-              ヘッダー行の有無
-            </div>
-            <label
-              style="
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                margin-bottom: 10px;
-              "
-            >
-              <input
-                type="radio"
-                name="headerOption"
-                value="withHeader"
-                checked
-                style="
-                  margin-right: 10px;
-                  width: 18px;
-                  height: 18px;
-                  cursor: pointer;
-                "
-              />
-              <span style="font-size: 14px"
-                ><strong>ヘッダー行あり</strong> -
-                エラーメッセージの行番号はヘッダーを除いたデータ行の番号</span
-              >
-            </label>
-            <label style="display: flex; align-items: center; cursor: pointer">
-              <input
-                type="radio"
-                name="headerOption"
-                value="withoutHeader"
-                style="
-                  margin-right: 10px;
-                  width: 18px;
-                  height: 18px;
-                  cursor: pointer;
-                "
-              />
-              <span style="font-size: 14px"
-                ><strong>ヘッダー行なし</strong> -
-                エラーメッセージの行番号はファイルの先頭からの行番号</span
-              >
+            <label>
+              <input type="radio" name="headerOption" value="withoutHeader" />
+              <span><strong style="font-weight:500;">ヘッダー行なし</strong> — エラーの行番号はファイル先頭からの番号</span>
             </label>
           </div>
         </div>
-
-        <div class="section">
-          <div class="section-title">2. エラーメッセージを貼り付け</div>
-          <textarea
-            id="errorMessages"
-            placeholder="エラーメッセージをここに貼り付けてください&#10;例:&#10;* 必須入力項目です。 (メルマガ配信用メールホスト) (197行目)&#10;* 必須入力項目です。 (メッセージカード シーンリスト) (853行目)"
-          ></textarea>
-        </div>
-
-        <div class="section">
-          <button class="button" id="processBtn" disabled>
-            エラー行を削除して新しいCSVを作成
-          </button>
-        </div>
-
-        <div id="result"></div>
       </div>
+
+      <div class="card-section">
+        <div class="section-title">2. エラーメッセージを貼り付け</div>
+        <textarea id="errorMessages" placeholder="エラーメッセージをここに貼り付けてください&#10;例:&#10;* 必須入力項目です。 (メルマガ配信用メールホスト) (197行目)&#10;* 必須入力項目です。 (メッセージカード シーンリスト) (853行目)"></textarea>
+      </div>
+
+      <div class="card-section">
+        <button class="btn-primary" id="processBtn" disabled style="margin-top:0;">エラー行を削除して新しい CSV を作成</button>
+      </div>
+
+      <div id="result"></div>
     </div>
 
     <script>
       let originalCsvText = "";
-      let csvRowRanges = null; // 各行の開始・終了位置
+      let csvRowRanges = null;
       let detectedEncoding = null;
       let originalFileName = "";
       let totalRows = 0;
@@ -319,15 +78,11 @@
 
       fileLabel.addEventListener("dragover", (e) => {
         e.preventDefault();
-        fileLabel.style.background = "#e9ecef";
+        fileLabel.style.borderColor = "var(--caramel)";
       });
-
       fileLabel.addEventListener("dragleave", () => {
-        if (!csvRowRanges) {
-          fileLabel.style.background = "#f8f9fa";
-        }
+        if (!csvRowRanges) fileLabel.style.borderColor = "";
       });
-
       fileLabel.addEventListener("drop", (e) => {
         e.preventDefault();
         const files = e.dataTransfer.files;
@@ -340,44 +95,30 @@
       function handleFileSelect() {
         const file = fileInput.files[0];
         if (!file) return;
-
         originalFileName = file.name;
 
         const reader = new FileReader();
         reader.onload = function (e) {
           const arrayBuffer = e.target.result;
           const bytes = new Uint8Array(arrayBuffer);
-
-          // 文字コードを検出
           detectedEncoding = Encoding.detect(bytes);
-          console.log("Detected encoding:", detectedEncoding);
-
-          // Unicode配列に変換してからテキストに変換
-          const unicodeArray = Encoding.convert(bytes, {
-            to: "UNICODE",
-            from: detectedEncoding,
-          });
+          const unicodeArray = Encoding.convert(bytes, { to: "UNICODE", from: detectedEncoding });
           originalCsvText = Encoding.codeToString(unicodeArray);
 
-          // PapaParseで正確な行数を取得
           Papa.parse(originalCsvText, {
             skipEmptyLines: false,
             complete: function (results) {
               totalRows = results.data.length;
-
-              // 元のテキストから各論理行のテキストを抽出
               csvRowRanges = extractCsvRows(originalCsvText, results.data);
 
               fileLabel.classList.add("has-file");
               fileLabel.innerHTML = `
-                            <div style="font-size: 48px; margin-bottom: 10px;">✅</div>
-                            <div><strong>${file.name}</strong></div>
-                            <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                                ${totalRows}行 (ヘッダー含む) | データ行: ${
-                totalRows - 1
-              }行 | 文字コード: ${detectedEncoding}
-                            </div>
-                        `;
+                <div style="font-size:1.5rem; margin-bottom:8px;">✓</div>
+                <div style="font-weight:500;">${file.name}</div>
+                <div style="font-size:0.75rem; color:var(--muted); margin-top:6px;">
+                  ${totalRows} 行（ヘッダー含む）| データ: ${totalRows - 1} 行 | ${detectedEncoding}
+                </div>
+              `;
               checkEnableButton();
             },
           });
@@ -386,77 +127,34 @@
       }
 
       errorMessages.addEventListener("input", checkEnableButton);
-
       function checkEnableButton() {
         processBtn.disabled = !(csvRowRanges && errorMessages.value.trim());
       }
 
-      // 元のCSVテキストから各論理行を抽出する関数
       function extractCsvRows(text, parsedData) {
         const rows = [];
         let pos = 0;
-
         for (let i = 0; i < parsedData.length; i++) {
-          const rowData = parsedData[i];
-
-          // この行のテキストをPapaParseで再生成
-          const reconstructed = Papa.unparse([rowData], {
-            quotes: false,
-            quoteChar: '"',
-            escapeChar: '"',
-            delimiter: ",",
-            newline: "",
-          });
-
-          // 元のテキストからこの行を探す
-          let searchStart = pos;
-          let foundEnd = -1;
-
-          // 次の改行を探す
-          let idx = searchStart;
+          let idx = pos;
           let inQuotes = false;
+          let foundEnd = -1;
 
           while (idx < text.length) {
             const char = text[idx];
-
             if (char === '"') {
-              // 次の文字もダブルクォートならエスケープされている
-              if (idx + 1 < text.length && text[idx + 1] === '"') {
-                idx += 2;
-                continue;
-              }
+              if (idx + 1 < text.length && text[idx + 1] === '"') { idx += 2; continue; }
               inQuotes = !inQuotes;
             } else if (!inQuotes && (char === "\n" || char === "\r")) {
-              // クォート外の改行を発見
-              foundEnd = idx;
-              if (
-                char === "\r" &&
-                idx + 1 < text.length &&
-                text[idx + 1] === "\n"
-              ) {
-                foundEnd = idx + 2; // \r\n
-              } else {
-                foundEnd = idx + 1; // \n or \r
-              }
+              foundEnd = (char === "\r" && idx + 1 < text.length && text[idx + 1] === "\n") ? idx + 2 : idx + 1;
               break;
             }
-
             idx++;
           }
 
-          // 最終行の場合
-          if (foundEnd === -1) {
-            foundEnd = text.length;
-          }
-
-          rows.push({
-            start: pos,
-            end: foundEnd,
-          });
-
+          if (foundEnd === -1) foundEnd = text.length;
+          rows.push({ start: pos, end: foundEnd });
           pos = foundEnd;
         }
-
         return rows;
       }
 
@@ -467,118 +165,71 @@
         const rowNumbers = extractRowNumbers(errorText);
 
         if (rowNumbers.length === 0) {
-          result.innerHTML = `
-                    <div class="error-box">
-                        <strong>⚠️ エラー:</strong> エラーメッセージから行番号を抽出できませんでした。
-                    </div>
-                `;
+          result.innerHTML = `<div class="error-box"><strong>エラー:</strong> エラーメッセージから行番号を抽出できませんでした。</div>`;
           return;
         }
 
-        // ヘッダーオプションを取得
-        const headerOption = document.querySelector(
-          'input[name="headerOption"]:checked'
-        ).value;
-        const hasHeader = headerOption === "withHeader";
-
-        // 削除対象の行番号をSetに入れる
-        // ヘッダーありの場合: エラーの197行目 = 配列の197番目（0:ヘッダー、197:データ197行目）
-        // ヘッダーなしの場合: エラーの1行目 = 配列の1番目（0:1行目、1:2行目）
-        const rowsToDelete = new Set();
-        rowNumbers.forEach((rowNum) => {
-          if (hasHeader) {
-            // ヘッダーありの場合、行番号をそのまま使用
-            rowsToDelete.add(rowNum);
-          } else {
-            // ヘッダーなしの場合、行番号-1を使用（1行目 = インデックス0）
-            rowsToDelete.add(rowNum - 1);
-          }
-        });
-
-        // 元のデータ行数（ヘッダー除く）
+        const hasHeader = document.querySelector('input[name="headerOption"]:checked').value === "withHeader";
+        const rowsToDelete = new Set(rowNumbers.map(n => hasHeader ? n : n - 1));
         const originalDataRows = hasHeader ? totalRows - 1 : totalRows;
 
-        // 元のテキストから該当行以外を抽出
         const segments = [];
-
         for (let i = 0; i < csvRowRanges.length; i++) {
           if (!rowsToDelete.has(i)) {
-            // この行は残す
             const range = csvRowRanges[i];
             segments.push(originalCsvText.substring(range.start, range.end));
           }
         }
 
         const newCsvText = segments.join("");
-
-        // 元の文字コードでエンコード
         const unicodeArray = Encoding.stringToCode(newCsvText);
-        const encodedArray = Encoding.convert(unicodeArray, {
-          to: detectedEncoding,
-          from: "UNICODE",
-        });
+        const encodedArray = Encoding.convert(unicodeArray, { to: detectedEncoding, from: "UNICODE" });
         const uint8Array = new Uint8Array(encodedArray);
 
-        // ダウンロード
         const blob = new Blob([uint8Array], { type: "text/csv" });
         const link = document.createElement("a");
         const url = URL.createObjectURL(blob);
         link.setAttribute("href", url);
-
-        // ファイル名生成
-        const baseName = originalFileName.replace(/\.csv$/i, "");
-        link.setAttribute("download", `${baseName}_cleaned.csv`);
-
+        link.setAttribute("download", `${originalFileName.replace(/\.csv$/i, "")}_cleaned.csv`);
         link.style.visibility = "hidden";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
-        // 新しいデータ行数（ヘッダー除く）
         const newDataRows = originalDataRows - rowNumbers.length;
 
-        const headerText = hasHeader ? "ヘッダー行あり" : "ヘッダー行なし";
-
-        // 結果表示
         result.innerHTML = `
-                <div class="result-box">
-                    <strong>✅ 処理完了!</strong> 新しいCSVファイルをダウンロードしました。
-                    
-                    <div class="stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${originalDataRows}</div>
-                            <div class="stat-label">元のデータ行数</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${rowNumbers.length}</div>
-                            <div class="stat-label">削除された行数</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${newDataRows}</div>
-                            <div class="stat-label">新しいデータ行数</div>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 15px; font-size: 12px; color: #666;">
-                        設定: ${headerText}<br>
-                        文字コード: ${detectedEncoding}<br>
-                        削除された行番号: ${Array.from(rowNumbers)
-                          .sort((a, b) => a - b)
-                          .join(", ")}
-                    </div>
-                </div>
-            `;
+          <div class="result-box">
+            <strong>処理完了</strong> — 新しい CSV ファイルをダウンロードしました。
+            <div class="stats-grid">
+              <div class="stat-item">
+                <div class="stat-value">${originalDataRows}</div>
+                <div class="stat-label">元のデータ行数</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">${rowNumbers.length}</div>
+                <div class="stat-label">削除された行数</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-value">${newDataRows}</div>
+                <div class="stat-label">新しいデータ行数</div>
+              </div>
+            </div>
+            <div style="margin-top:14px; font-size:0.78rem; color:var(--muted);">
+              ${hasHeader ? "ヘッダー行あり" : "ヘッダー行なし"} | ${detectedEncoding} |
+              削除行: ${Array.from(rowNumbers).sort((a, b) => a - b).join(", ")}
+            </div>
+          </div>
+        `;
       }
 
       function extractRowNumbers(text) {
         const regex = /\((\d+)行目\)/g;
         const numbers = [];
         let match;
-
         while ((match = regex.exec(text)) !== null) {
           numbers.push(parseInt(match[1]));
         }
-
         return numbers;
       }
     </script>

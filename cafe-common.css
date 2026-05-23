@@ -1,0 +1,474 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #F5EFE6;
+  --surface: #FFFDF7;
+  --espresso: #2D1B0E;
+  --coffee: #5C3D2E;
+  --caramel: #9B6A38;
+  --muted: #9A8070;
+  --border: #E0D0BB;
+  --input-bg: #FAF6F0;
+  --shadow: rgba(45, 27, 14, 0.07);
+  --success: #5C8A65;
+  --success-bg: #EEF5EF;
+  --warning-bg: #FDF6E3;
+  --error: #A05050;
+  --error-bg: #FAF0F0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-weight: 300;
+  background-color: var(--bg);
+  color: var(--espresso);
+  min-height: 100vh;
+  line-height: 1.7;
+}
+
+/* ===== Navigation ===== */
+.page-nav {
+  padding: 14px 28px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.page-nav__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: color 0.2s;
+}
+
+.page-nav__back::before { content: '←'; }
+.page-nav__back:hover { color: var(--caramel); }
+
+/* ===== Page header ===== */
+.page-header {
+  text-align: center;
+  padding: 52px 24px 36px;
+}
+
+.page-header__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--espresso);
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  margin-bottom: 10px;
+}
+
+.page-header__subtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+
+.page-header__divider {
+  width: 36px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--caramel), transparent);
+  margin: 16px auto 0;
+}
+
+/* ===== Container ===== */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* ===== Card section ===== */
+.card-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px var(--shadow);
+}
+
+/* ===== Section title ===== */
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ===== Labels ===== */
+label, .field-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* ===== Form elements ===== */
+textarea,
+input[type="text"],
+select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--espresso);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 300;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+select:focus {
+  border-color: var(--caramel);
+  background: var(--surface);
+}
+
+textarea {
+  min-height: 160px;
+  resize: vertical;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 0.83rem;
+  line-height: 1.6;
+}
+
+input[type="file"] {
+  font-family: inherit;
+  font-size: 0.83rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* ===== Radio group ===== */
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+}
+
+.radio-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 300;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--coffee);
+  cursor: pointer;
+}
+
+/* ===== Buttons ===== */
+.btn-primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 28px;
+  margin-top: 16px;
+  background: var(--espresso);
+  color: #FAF6F0;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover { background: var(--coffee); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 18px;
+  background: transparent;
+  color: var(--coffee);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  border-color: var(--caramel);
+  color: var(--caramel);
+  background: var(--input-bg);
+}
+
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: transparent;
+  border: 1px solid var(--caramel);
+  border-radius: 4px;
+  color: var(--caramel);
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover,
+.btn-copy.copied {
+  background: var(--caramel);
+  color: white;
+}
+
+/* ===== Info boxes ===== */
+.info-box {
+  background: var(--warning-bg);
+  border-left: 3px solid var(--caramel);
+  border-radius: 0 6px 6px 0;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  font-size: 0.83rem;
+  color: var(--coffee);
+  line-height: 1.7;
+}
+
+.result-box {
+  background: var(--success-bg);
+  border-left: 3px solid var(--success);
+  border-radius: 0 6px 6px 0;
+  padding: 14px 18px;
+  margin-top: 20px;
+  font-size: 0.83rem;
+  color: var(--coffee);
+}
+
+.error-box {
+  background: var(--error-bg);
+  border-left: 3px solid var(--error);
+  border-radius: 0 6px 6px 0;
+  padding: 14px 18px;
+  margin-top: 20px;
+  font-size: 0.83rem;
+  color: var(--error);
+}
+
+/* ===== Stats ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.stat-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--caramel);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 6px;
+  font-weight: 400;
+}
+
+/* ===== Output field ===== */
+.output-field {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--espresso);
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.83rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+textarea.output-field { min-height: 120px; }
+
+/* ===== Badge ===== */
+.badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  background: var(--espresso);
+  color: #FAF6F0;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* ===== Result card ===== */
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px var(--shadow);
+}
+
+.card-header {
+  background: var(--input-bg);
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--coffee);
+}
+
+.card-body {
+  padding: 24px;
+}
+
+/* ===== Copy group ===== */
+.copy-group {
+  margin-bottom: 20px;
+}
+
+.copy-group:last-child { margin-bottom: 0; }
+
+.field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.field-header label { margin: 0; }
+
+/* ===== File upload zone ===== */
+.file-input-label {
+  display: block;
+  padding: 28px 20px;
+  background: var(--input-bg);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.file-input-label:hover {
+  border-color: var(--caramel);
+  background: var(--warning-bg);
+  color: var(--coffee);
+}
+
+.file-input-label.has-file {
+  border-color: var(--success);
+  background: var(--success-bg);
+  color: var(--coffee);
+  border-style: solid;
+}
+
+/* ===== Form group ===== */
+.form-group {
+  margin-bottom: 22px;
+}
+
+.form-group:last-child { margin-bottom: 0; }
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--espresso);
+  color: #FAF6F0;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.toast.visible { opacity: 1; }
+
+/* ===== Controls row ===== */
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ===== Visually hidden ===== */
+.u-visuallyHidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  border: 0;
+}

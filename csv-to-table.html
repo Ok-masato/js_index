@@ -3,76 +3,50 @@
 
   <head>
     <meta charset="utf-8" />
-    <title>CSV → Table 変換ツール</title>
-    <style>
-      body {
-        font-family: "Segoe UI", sans-serif;
-        padding: 30px;
-        background: #f9fafb;
-      }
-
-      .action-row {
-        margin-bottom: 20px;
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-      }
-
-      .format-selector {
-        background: #fff;
-        padding: 10px 15px;
-        border-radius: 6px;
-        border: 1px solid #ddd;
-        display: flex;
-        gap: 15px;
-      }
-
-      .btn {
-        background: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        padding: 8px 14px;
-        cursor: pointer;
-      }
-
-      .btn:hover {
-        background: #0056b3;
-      }
-
-      #output {
-        width: 100%;
-        height: 400px;
-        padding: 10px;
-        font-family: monospace;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        resize: vertical;
-      }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV → Table 変換</title>
+    <link rel="stylesheet" href="cafe-common.css" />
   </head>
 
   <body>
-    <h2>📄 CSV → Table 変換ツール</h2>
+    <nav class="page-nav">
+      <a class="page-nav__back" href="index.html">Tools</a>
+    </nav>
 
-    <div class="action-row">
-      <input type="file" id="csvFile" accept=".csv" />
-
-      <div class="format-selector">
-        <strong>出力形式:</strong>
-        <label><input type="radio" name="format" value="markdown" checked> Markdown</label>
-        <label><input type="radio" name="format" value="backlog"> Backlog</label>
-      </div>
-
-      <button class="btn" id="convertBtn">変換する</button>
-      <button class="btn" id="downloadBtn" style="display: none">
-        ダウンロード
-      </button>
+    <div class="page-header">
+      <h1 class="page-header__title">CSV → Table 変換</h1>
+      <p class="page-header__subtitle">Markdown / Backlog 形式へ変換</p>
+      <div class="page-header__divider"></div>
     </div>
 
-    <h3>出力結果</h3>
-    <textarea id="output" readonly></textarea>
+    <div class="container">
+      <div class="card-section">
+        <div class="section-title">Input</div>
+
+        <div class="form-group">
+          <label for="csvFile">CSV ファイル</label>
+          <input type="file" id="csvFile" accept=".csv" />
+        </div>
+
+        <div class="form-group">
+          <label>出力形式</label>
+          <div class="radio-group">
+            <label><input type="radio" name="format" value="markdown" checked> Markdown</label>
+            <label><input type="radio" name="format" value="backlog"> Backlog</label>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn-primary" id="convertBtn" style="flex:1;">変換する</button>
+          <button class="btn-secondary" id="downloadBtn" style="display:none; margin-top:16px;">ダウンロード</button>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="section-title">Output</div>
+        <textarea id="output" class="output-field" style="min-height:360px;" readonly></textarea>
+      </div>
+    </div>
 
     <script>
       document.getElementById("convertBtn").addEventListener("click", async () => {
@@ -82,32 +56,25 @@
         const format = document.querySelector('input[name="format"]:checked').value;
 
         if (!fileInput.files.length) {
-          alert("CSVファイルを選択してください。");
+          alert("CSV ファイルを選択してください。");
           return;
         }
 
         const file = fileInput.files[0];
         const arrayBuffer = await file.arrayBuffer();
-
-        // Shift_JISでデコード
         const decoder = new TextDecoder("shift-jis");
         const text = decoder.decode(arrayBuffer);
-
-        // 区切り文字自動判定
         const delimiter = text.includes("\t") ? "\t" : ",";
 
-        // CSVを行ごとに分割
         let rows = text
           .trim()
           .split(/\r?\n/)
           .map((line) => line.split(delimiter));
 
-        // 【追加】1行目が CLIENT_NO で始まる場合は削除
         if (rows.length > 0 && rows[0][0].replace(/^"|"$/g, "").trim() === "CLIENT_NO") {
           rows.shift();
         }
 
-        // NaNや空欄を "null" に置換 ＋ ダブルクオート削除
         const cleanRows = rows.map((row) =>
           row.map((cell) => {
             const trimmed = cell.trim();
@@ -123,14 +90,12 @@
         let result = "";
 
         if (format === "markdown") {
-          // Markdown
           result += `| ${headers.join(" | ")} |\n`;
           result += `|${headers.map(() => "---").join("|")}|\n`;
           dataRows.forEach((row) => {
             result += `| ${row.join(" | ")} |\n`;
           });
         } else {
-          // Backlog (ヘッダ末尾に h)
           result += `| ${headers.join(" | ")} |h\n`;
           dataRows.forEach((row) => {
             result += `| ${row.join(" | ")} |\n`;
@@ -138,15 +103,13 @@
         }
 
         output.value = result;
-        downloadBtn.style.display = "inline-block";
+        downloadBtn.style.display = "inline-flex";
       });
 
       document.getElementById("downloadBtn").addEventListener("click", () => {
         const text = document.getElementById("output").value;
         const format = document.querySelector('input[name="format"]:checked').value;
-        const blob = new Blob([text], {
-          type: "text/plain;charset=utf-8"
-        });
+        const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = `output_${format}.txt`;

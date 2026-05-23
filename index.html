@@ -9,74 +9,84 @@
 	</head>
 
 	<body>
+		<header class="site-header">
+			<p class="site-header__eyebrow">Developer Tools</p>
+			<h1 class="site-header__title">Tools</h1>
+			<div class="site-header__divider"></div>
+			<p class="site-header__subtitle"></p>
+		</header>
+
 		<main class="contents">
-			<h1>Top</h1>
 			<ul id="l-grid" class="l-grid"></ul>
 			<script>
 				const links = [{
-						title: "エラーチケットフォーマットツール",
+						title: "エラーチケット フォーマット",
 						url: "errorlog-to-ticket-format.html",
-						external: false
+						external: false,
 					},
 					{
-						title: "Eclipse検索整形ツール",
+						title: "Eclipse 検索整形",
 						url: "eclipse-search-formatter.html",
 						external: false,
 					},
 					{
-						title: "CSVエラー行除去ツール",
+						title: "CSV エラー行除去",
 						url: "csv-error-row-remover.html",
 						external: false,
 					},
 					{
-						title: "CSV → Table 変換ツール",
+						title: "CSV → Table 変換",
 						url: "csv-to-table.html",
 						external: false,
 					},
 					{
-						title: "IPアドレス情報取得",
+						title: "IP アドレス情報取得",
 						url: "https://ipinfo.io/",
 						external: true,
 					},
 					{
 						title: "差分抽出",
 						url: "https://difff.jp/",
-						external: true
+						external: true,
 					},
 					{
-						title: "フォルダ構成図作成ツール",
+						title: "フォルダ構成図作成",
 						url: "folder-tree.html",
-						external: false
+						external: false,
 					},
 					{
-						title: "データ移行SQL作成ツール",
+						title: "データ移行 SQL 作成",
 						url: "sql-create.html",
-						external: false
+						external: false,
 					},
 					{
-						title: "サンプルタイトル",
+						title: "サンプル",
 						url: "sample.html",
-						external: false
+						external: false,
 					},
 				];
+
 				const ul = document.getElementById("l-grid");
+
 				links.forEach((link) => {
 					const li = document.createElement("li");
 					li.className = "c-card";
-					// 背景リンク
+
 					const detailLink = document.createElement("a");
 					detailLink.className = "c-card__detail";
 					detailLink.href = link.url;
 					detailLink.tabIndex = -1;
+					if (link.external) {
+						detailLink.target = "_blank";
+						detailLink.rel = "noopener noreferrer";
+					}
 
 					const hiddenSpan = document.createElement("span");
 					hiddenSpan.className = "u-visuallyHidden";
 					hiddenSpan.textContent = link.title + "へ";
-
 					detailLink.appendChild(hiddenSpan);
 					li.appendChild(detailLink);
 
-					// カード本文
 					const bodyDiv = document.createElement("div");
 					bodyDiv.className = "c-card__body";
 
@@ -86,7 +96,6 @@
 					const titleLink = document.createElement("a");
 					titleLink.href = link.url;
 					titleLink.textContent = link.title;
-
 					if (link.external) {
 						titleLink.target = "_blank";
 						titleLink.rel = "noopener noreferrer";
@@ -94,13 +103,23 @@
 
 					h3.appendChild(titleLink);
 					bodyDiv.appendChild(h3);
-					li.appendChild(bodyDiv);
 
-					// ③ liをulに追加
+					if (link.external) {
+						const badge = document.createElement("span");
+						badge.className = "c-card__badge";
+						badge.textContent = "External";
+						bodyDiv.appendChild(badge);
+					}
+
+					li.appendChild(bodyDiv);
 					ul.appendChild(li);
 				});
 			</script>
 		</main>
+
+		<footer class="site-footer">
+			&copy; Tools Collection
+		</footer>
 	</body>
 
 </html>

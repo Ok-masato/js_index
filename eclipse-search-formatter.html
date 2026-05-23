@@ -3,229 +3,162 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Eclipse検索結果ツリー整形ツール</title>
+    <title>Eclipse 検索整形</title>
+    <link rel="stylesheet" href="cafe-common.css" />
     <style>
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 20px;
-        background-color: #f5f5f5;
+      #output { background: var(--input-bg); white-space: pre; overflow-x: auto; }
+      .stats-bar {
+        background: var(--success-bg);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 10px 16px;
+        margin-bottom: 12px;
+        font-size: 0.8rem;
+        color: var(--success);
+        display: none;
       }
-      .container {
-        background: white;
-        border-radius: 8px;
-        padding: 30px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      .warning-bar {
+        background: var(--warning-bg);
+        border-left: 3px solid var(--caramel);
+        border-radius: 0 6px 6px 0;
+        padding: 10px 16px;
+        margin-bottom: 12px;
+        font-size: 0.8rem;
+        color: var(--coffee);
+        display: none;
       }
-      h1 {
-        color: #333;
-        margin-bottom: 10px;
+      .example-box {
+        background: var(--warning-bg);
+        border-left: 3px solid var(--caramel);
+        border-radius: 0 6px 6px 0;
+        padding: 14px 18px;
+        margin-bottom: 24px;
+        font-size: 0.82rem;
+        color: var(--coffee);
+        line-height: 1.8;
       }
-      .description {
-        color: #666;
-        margin-bottom: 20px;
-        font-size: 14px;
-      }
-      textarea {
-        width: 100%;
-        min-height: 250px;
-        padding: 15px;
-        border: 2px solid #ddd;
-        border-radius: 4px;
-        font-family: "Consolas", "Monaco", monospace;
-        font-size: 12px;
-        resize: vertical;
-        box-sizing: border-box;
-        line-height: 1.5;
-      }
-      textarea:focus {
-        outline: none;
-        border-color: #4caf50;
-      }
-      .controls {
-        margin: 20px 0;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      button {
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: bold;
-        transition: background-color 0.3s;
-      }
-      button:hover {
-        background-color: #45a049;
-      }
-      button.secondary {
-        background-color: #2196f3;
-      }
-      button.secondary:hover {
-        background-color: #0b7dda;
-      }
-      label {
+      .section-header {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-size: 14px;
-        color: #555;
-      }
-      select {
-        padding: 6px 10px;
-        border: 2px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-      }
-      .input-section {
-        margin-bottom: 20px;
-      }
-      .section-title {
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
         margin-bottom: 10px;
+      }
+      .section-header-label {
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .clear-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--muted);
+        font-size: 0.7rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+      }
+      .clear-btn:hover { border-color: var(--error); color: var(--error); }
+      .controls-row {
         display: flex;
         align-items: center;
         gap: 10px;
+        flex-wrap: wrap;
       }
-      .clear-btn {
-        background-color: #f44336;
-        color: white;
-        border: none;
-        padding: 4px 10px;
-        border-radius: 3px;
+      select {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: var(--input-bg);
+        color: var(--coffee);
+        font-family: inherit;
+        font-size: 0.83rem;
+        outline: none;
+      }
+      select:focus { border-color: var(--caramel); }
+      .check-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.83rem;
+        color: var(--coffee);
         cursor: pointer;
-        font-size: 12px;
-        font-weight: normal;
-        transition: background-color 0.3s;
-      }
-      .clear-btn:hover {
-        background-color: #da190b;
-      }
-      #output {
-        background-color: #f9f9f9;
-        white-space: pre;
-        overflow-x: auto;
-      }
-      .example {
-        background-color: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 15px;
-        margin: 20px 0;
-        font-size: 13px;
-      }
-      .example-title {
-        font-weight: bold;
-        margin-bottom: 8px;
-        color: #856404;
-      }
-      .stats {
-        background-color: #e8f5e9;
-        padding: 10px 15px;
-        border-radius: 4px;
-        margin-top: 10px;
-        font-size: 13px;
-        color: #2e7d32;
-      }
-      .warning {
-        background-color: #fff3cd;
-        border-left: 4px solid #ff9800;
-        padding: 10px 15px;
-        border-radius: 4px;
-        margin-top: 10px;
-        font-size: 13px;
-        color: #856404;
-        display: none;
+        font-weight: 300;
       }
     </style>
   </head>
   <body>
+    <nav class="page-nav">
+      <a class="page-nav__back" href="index.html">Tools</a>
+    </nav>
+
+    <div class="page-header">
+      <h1 class="page-header__title">Eclipse 検索整形</h1>
+      <p class="page-header__subtitle">検索結果をツリー構造に整形</p>
+      <div class="page-header__divider"></div>
+    </div>
+
     <div class="container">
-      <h1>🌲 Eclipse検索結果ツリー整形ツール</h1>
-      <p class="description">
-        Eclipseの検索結果をコピーして貼り付けると、ツリー構造（インデント付き）に整形します
-      </p>
-
-      <div class="example">
-        <div class="example-title">使い方:</div>
-        1. Eclipseで検索を実行（Ctrl+H）<br />
-        2. 検索結果ビューの左上のメニューから「Show as List」を選択<br />
-        3. 全選択（Ctrl+A）してコピー<br />
-        4. 下の「パス情報」テキストエリアに貼り付け<br />
-        5. （オプション）マッチ行の詳細も含めたい場合は、「Show as
-        Tree」でコピーして「詳細情報」に貼り付け<br />
-        6. 「ツリー構造に整形」ボタンをクリック
+      <div class="example-box">
+        <strong style="display:block; margin-bottom:6px;">使い方</strong>
+        1. Eclipse で検索を実行（Ctrl+H）<br />
+        2. 検索結果ビューの左上メニューから「Show as List」を選択<br />
+        3. 全選択（Ctrl+A）してコピー → 下の「パス情報」に貼り付け<br />
+        4. 「Show as Tree」でコピーした詳細は「詳細情報」に貼り付け（任意）<br />
+        5. 「ツリー構造に整形」をクリック
       </div>
 
-      <div class="input-section">
-        <div class="section-title">
-          パス情報（必須）:
-          <button
-            class="clear-btn"
-            onclick="clearInput('pathInput')"
-            title="クリア"
-          >
-            ✕
-          </button>
+      <div class="card-section">
+        <div class="section-header">
+          <span class="section-header-label">パス情報（必須）</span>
+          <button class="clear-btn" onclick="clearInput('pathInput')">✕ クリア</button>
         </div>
-        <textarea
-          id="pathInput"
-          placeholder="例:
+        <textarea id="pathInput" placeholder="例:
 AdminMemberPointRecordInputBean.java - ebisu3/src/jp/co/interfactory/ebisu/command/admin/member (18 個の一致)
-AdminOrderInputBaseBean.java - ebisu3/src/jp/co/interfactory/ebisu/command/admin/order (4 個の一致)"
-        ></textarea>
+AdminOrderInputBaseBean.java - ebisu3/src/jp/co/interfactory/ebisu/command/admin/order (4 個の一致)"></textarea>
       </div>
 
-      <div class="input-section">
-        <div class="section-title">
-          詳細情報（オプション - マッチ行を含める場合）:
-          <button
-            class="clear-btn"
-            onclick="clearInput('detailInput')"
-            title="クリア"
-          >
-            ✕
-          </button>
+      <div class="card-section">
+        <div class="section-header">
+          <span class="section-header-label">詳細情報（オプション）</span>
+          <button class="clear-btn" onclick="clearInput('detailInput')">✕ クリア</button>
         </div>
-        <textarea
-          id="detailInput"
-          placeholder="例:
+        <textarea id="detailInput" placeholder="例:
 AdminMemberPointRecordInputBean.java (18 個の一致)
 131: setData(...
-346: return ..."
-        ></textarea>
+346: return ..."></textarea>
       </div>
 
-      <div class="controls">
-        <button onclick="formatTree()">ツリー構造に整形</button>
-        <button class="secondary" onclick="copyOutput()">結果をコピー</button>
-        <button class="secondary" onclick="clearAll()">全てクリア</button>
-        <label>
-          インデント:
-          <select id="indentType">
-            <option value="space2">2スペース</option>
-            <option value="space4">4スペース</option>
-            <option value="tab">タブ</option>
-          </select>
-        </label>
-        <label>
-          <input type="checkbox" id="showIcons" checked />
-          アイコン表示
-        </label>
+      <div class="card-section">
+        <div class="controls-row">
+          <button class="btn-primary" style="width:auto; margin:0;" onclick="formatTree()">ツリー構造に整形</button>
+          <button class="btn-secondary" onclick="copyOutput()">コピー</button>
+          <button class="btn-secondary" onclick="clearAll()">全クリア</button>
+          <label class="check-label" style="margin-left:auto;">
+            インデント:
+            <select id="indentType">
+              <option value="space2">2 スペース</option>
+              <option value="space4">4 スペース</option>
+              <option value="tab">タブ</option>
+            </select>
+          </label>
+          <label class="check-label">
+            <input type="checkbox" id="showIcons" checked />
+            アイコン
+          </label>
+        </div>
       </div>
 
-      <div class="input-section">
-        <div class="section-title">出力（ツリー構造）:</div>
-        <div id="stats" class="stats" style="display: none"></div>
-        <div id="warning" class="warning"></div>
-        <textarea id="output" readonly></textarea>
+      <div class="card-section">
+        <div class="section-title">Output</div>
+        <div id="statsBar" class="stats-bar"></div>
+        <div id="warningBar" class="warning-bar"></div>
+        <textarea id="output" class="output-field" style="min-height:260px;" readonly></textarea>
       </div>
     </div>
 
@@ -240,16 +173,12 @@ AdminMemberPointRecordInputBean.java (18 個の一致)
         if (indentType === "space4") indent = "    ";
         if (indentType === "tab") indent = "\t";
 
-        // パス情報をパース
         const pathLines = pathInput.split("\n");
         const fileInfoList = [];
 
         for (const line of pathLines) {
           if (!line.trim()) continue;
-
-          const match = line.match(
-            /^(.+?)\s+-\s+(.+?)(?:\s+\((\d+)\s*個の一致\))?$/
-          );
+          const match = line.match(/^(.+?)\s+-\s+(.+?)(?:\s+\((\d+)\s*個の一致\))?$/);
           if (match) {
             const [, filename, path, matchCount] = match;
             fileInfoList.push({
@@ -261,7 +190,6 @@ AdminMemberPointRecordInputBean.java (18 個の一致)
           }
         }
 
-        // 詳細情報をパース
         const detailList = [];
 
         if (detailInput.trim()) {
@@ -272,237 +200,140 @@ AdminMemberPointRecordInputBean.java (18 個の一致)
 
           for (const line of detailLines) {
             if (!line.trim()) continue;
-
             const content = line.trim();
 
-            // マッチ行（行番号で始まる - カンマ区切りにも対応）
             if (content.match(/^[\d,]+:/)) {
-              if (currentFilename) {
-                currentMatches.push(content);
-              }
+              if (currentFilename) currentMatches.push(content);
               continue;
             }
 
-            // ファイル名行（拡張子がある）
-            if (
-              content.match(/\.(java|xml|properties|jsp|js|css|html)(\s+\(|$)/i)
-            ) {
-              // 前のファイルを保存
+            if (content.match(/\.(java|xml|properties|jsp|js|css|html)(\s+\(|$)/i)) {
               if (currentFilename && currentMatches.length > 0) {
-                detailList.push({
-                  filename: currentFilename,
-                  matches: [...currentMatches],
-                  rootDir: currentRootDir,
-                });
+                detailList.push({ filename: currentFilename, matches: [...currentMatches], rootDir: currentRootDir });
               }
-
-              // 新しいファイル
               const fileMatch = content.match(/^(.+?)\s+\((\d+)\s*個の一致\)$/);
-              currentFilename = fileMatch
-                ? fileMatch[1].trim()
-                : content.split(/\s+/)[0];
+              currentFilename = fileMatch ? fileMatch[1].trim() : content.split(/\s+/)[0];
               currentMatches = [];
               continue;
             }
 
-            // ルートディレクトリ（インデントなし、大文字・アンダースコア・数字のみ）
-            if (
-              !line.match(/^\s/) &&
-              content.length > 0 &&
-              !content.match(/^[\d,]+:/)
-            ) {
-              if (content.match(/^[A-Z_0-9]+$/)) {
-                currentRootDir = content;
-              }
+            if (!line.match(/^\s/) && content.length > 0 && !content.match(/^[\d,]+:/)) {
+              if (content.match(/^[A-Z_0-9]+$/)) currentRootDir = content;
             }
           }
 
-          // 最後のファイルを保存
           if (currentFilename && currentMatches.length > 0) {
-            detailList.push({
-              filename: currentFilename,
-              matches: [...currentMatches],
-              rootDir: currentRootDir,
-            });
+            detailList.push({ filename: currentFilename, matches: [...currentMatches], rootDir: currentRootDir });
           }
         }
 
-        // パス情報と詳細情報をマージ
         const fileOrder = [];
 
         for (const fileInfo of fileInfoList) {
-          let matches = [];
           let bestMatch = null;
           let bestMatchScore = -1;
 
-          // このファイル名に一致する詳細情報を探す
           for (const detail of detailList) {
             if (detail.filename !== fileInfo.filename) continue;
             if (detail._used) continue;
 
             if (detail.rootDir) {
-              const score = calculatePathSimilarity(
-                fileInfo.path,
-                detail.rootDir
-              );
-              if (score > bestMatchScore) {
-                bestMatchScore = score;
-                bestMatch = detail;
-              }
+              const score = calculatePathSimilarity(fileInfo.path, detail.rootDir);
+              if (score > bestMatchScore) { bestMatchScore = score; bestMatch = detail; }
             } else if (!bestMatch) {
-              bestMatch = detail;
-              bestMatchScore = 0;
+              bestMatch = detail; bestMatchScore = 0;
             }
           }
 
-          if (bestMatch) {
-            matches = bestMatch.matches;
-            bestMatch._used = true;
-          }
-
-          fileOrder.push({
-            filename: fileInfo.filename,
-            fullPath: fileInfo.fullPath,
-            path: fileInfo.path,
-            matchCount: fileInfo.matchCount,
-            matches: matches,
-          });
+          if (bestMatch) { bestMatch._used = true; }
+          fileOrder.push({ ...fileInfo, matches: bestMatch ? bestMatch.matches : [] });
         }
 
-        // パス類似度を計算
         function calculatePathSimilarity(fullPath, rootDir) {
           const pathUpper = fullPath.toUpperCase();
           const rootUpper = rootDir.toUpperCase();
-
-          // client_info配下のプロジェクト名を抽出
           const clientInfoMatch = pathUpper.match(/CLIENT_INFO\/([^\/]+)/);
-
           if (clientInfoMatch) {
             const projectName = clientInfoMatch[1];
-
-            if (projectName === rootUpper) {
-              return 1000;
-            } else if (
-              projectName.includes(rootUpper) ||
-              rootUpper.includes(projectName)
-            ) {
-              return 100;
-            }
+            if (projectName === rootUpper) return 1000;
+            if (projectName.includes(rootUpper) || rootUpper.includes(projectName)) return 100;
           } else {
-            // client_infoがない場合は、パス全体から探す
             const pathParts = pathUpper.split("/");
             for (const part of pathParts) {
-              if (part === rootUpper) {
-                return 1000;
-              }
+              if (part === rootUpper) return 1000;
             }
           }
-
           return 0;
         }
 
-        // ツリー構造を構築
         const tree = {};
 
         for (const fileInfo of fileOrder) {
           const parts = fileInfo.path.split("/");
           let current = tree;
-
-          for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (!current[part]) {
-              current[part] = { _isFolder: true, _children: {}, _files: [] };
-            }
+          for (const part of parts) {
+            if (!current[part]) current[part] = { _isFolder: true, _children: {}, _files: [] };
             current = current[part]._children;
           }
-
           if (!current._files) current._files = [];
-          current._files.push({
-            filename: fileInfo.filename,
-            matchCount: fileInfo.matchCount,
-            matches: fileInfo.matches,
-          });
+          current._files.push({ filename: fileInfo.filename, matchCount: fileInfo.matchCount, matches: fileInfo.matches });
         }
 
-        // ツリーを出力
         const result = [];
         let fileCount = 0;
 
         function outputTree(node, depth) {
           const folders = [];
           for (const [name, child] of Object.entries(node)) {
-            if (name.startsWith("_")) continue;
-            if (child._isFolder) {
-              folders.push(name);
-            }
+            if (!name.startsWith("_") && child._isFolder) folders.push(name);
           }
           folders.sort();
 
           for (const name of folders) {
             const child = node[name];
-            const indentStr = indent.repeat(depth);
-            const icon = showIcons ? "📁 " : "";
-            result.push(indentStr + icon + name);
+            result.push(indent.repeat(depth) + (showIcons ? "📁 " : "") + name);
             outputTree(child._children, depth + 1);
           }
 
           if (node._files && node._files.length > 0) {
             for (const fileInfo of node._files) {
-              const indentStr = indent.repeat(depth);
               let icon = "";
-
               if (showIcons) {
-                const name = fileInfo.filename;
-                if (name.endsWith(".java")) icon = "📄 ";
-                else if (name.endsWith(".xml")) icon = "📋 ";
-                else if (name.endsWith(".properties")) icon = "⚙️ ";
-                else if (name.endsWith(".jsp")) icon = "🌐 ";
-                else if (name.endsWith(".js")) icon = "📜 ";
-                else if (name.endsWith(".css")) icon = "🎨 ";
+                const n = fileInfo.filename;
+                if (n.endsWith(".java")) icon = "📄 ";
+                else if (n.endsWith(".xml")) icon = "📋 ";
+                else if (n.endsWith(".properties")) icon = "⚙️ ";
+                else if (n.endsWith(".jsp")) icon = "🌐 ";
+                else if (n.endsWith(".js")) icon = "📜 ";
+                else if (n.endsWith(".css")) icon = "🎨 ";
                 else icon = "📄 ";
               }
-
               fileCount++;
-              const matchInfo =
-                fileInfo.matchCount > 0
-                  ? ` (${fileInfo.matchCount} 個の一致)`
-                  : "";
-              result.push(indentStr + icon + fileInfo.filename + matchInfo);
-
+              const matchInfo = fileInfo.matchCount > 0 ? ` (${fileInfo.matchCount} 個の一致)` : "";
+              result.push(indent.repeat(depth) + icon + fileInfo.filename + matchInfo);
               if (fileInfo.matches && fileInfo.matches.length > 0) {
-                const matchIndent = indent.repeat(depth + 1);
-                for (const match of fileInfo.matches) {
-                  result.push(matchIndent + match);
-                }
+                fileInfo.matches.forEach(m => result.push(indent.repeat(depth + 1) + m));
               }
             }
           }
         }
 
         outputTree(tree, 0);
-
         document.getElementById("output").value = result.join("\n");
 
-        // 統計情報を表示
-        const statsDiv = document.getElementById("stats");
-        statsDiv.style.display = "block";
-        statsDiv.textContent = `整形完了: ${fileCount} ファイル, ${result.length} 行`;
+        const statsBar = document.getElementById("statsBar");
+        statsBar.style.display = "block";
+        statsBar.textContent = `整形完了: ${fileCount} ファイル, ${result.length} 行`;
 
-        // 警告表示
-        const warningDiv = document.getElementById("warning");
-        const unusedDetails = detailList.filter((d) => !d._used);
-
-        if (unusedDetails.length > 0) {
-          const unusedFiles = unusedDetails
-            .map((d) => d.filename)
-            .slice(0, 5)
-            .join(", ");
-          const more =
-            unusedDetails.length > 5 ? ` 他${unusedDetails.length - 5}件` : "";
-          warningDiv.style.display = "block";
-          warningDiv.textContent = `警告: 以下の詳細情報がパス情報とマッチしませんでした: ${unusedFiles}${more}`;
+        const warningBar = document.getElementById("warningBar");
+        const unused = detailList.filter(d => !d._used);
+        if (unused.length > 0) {
+          const names = unused.map(d => d.filename).slice(0, 5).join(", ");
+          const more = unused.length > 5 ? ` 他 ${unused.length - 5} 件` : "";
+          warningBar.style.display = "block";
+          warningBar.textContent = `警告: 詳細情報がマッチしませんでした: ${names}${more}`;
         } else {
-          warningDiv.style.display = "none";
+          warningBar.style.display = "none";
         }
       }
 
@@ -510,25 +341,18 @@ AdminMemberPointRecordInputBean.java (18 個の一致)
         const output = document.getElementById("output");
         output.select();
         document.execCommand("copy");
-
         const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = "✓ コピーしました!";
-        setTimeout(() => {
-          btn.textContent = originalText;
-        }, 2000);
+        const orig = btn.textContent;
+        btn.textContent = "コピー済み";
+        setTimeout(() => { btn.textContent = orig; }, 2000);
       }
 
-      function clearInput(inputId) {
-        document.getElementById(inputId).value = "";
-      }
+      function clearInput(id) { document.getElementById(id).value = ""; }
 
       function clearAll() {
-        document.getElementById("pathInput").value = "";
-        document.getElementById("detailInput").value = "";
-        document.getElementById("output").value = "";
-        document.getElementById("stats").style.display = "none";
-        document.getElementById("warning").style.display = "none";
+        ["pathInput", "detailInput", "output"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("statsBar").style.display = "none";
+        document.getElementById("warningBar").style.display = "none";
       }
     </script>
   </body>

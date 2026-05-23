@@ -1,56 +1,115 @@
-/* ===== 全体レイアウト ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+JP:wght@300;400;500&display=swap');
+
+:root {
+  --bg: #F5EFE6;
+  --surface: #FFFDF7;
+  --espresso: #2D1B0E;
+  --coffee: #5C3D2E;
+  --caramel: #9B6A38;
+  --muted: #9A8070;
+  --border: #E0D0BB;
+  --shadow: rgba(45, 27, 14, 0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
-  background-color: #f0f2f5;
-  margin: 0;
-  padding: 40px 20px;
-  color: #333;
+  font-family: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+  font-weight: 300;
+  background-color: var(--bg);
+  color: var(--espresso);
+  min-height: 100vh;
 }
 
-.contents {
-  background-color: #e4e4e4;
-  padding: 24px;
-  border-radius: 10px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-h1 {
+/* ===== Site header ===== */
+.site-header {
   text-align: center;
-  margin-bottom: 24px;
-  font-weight: 600;
-  font-size: 1.8rem;
-  color: #222;
+  padding: 64px 20px 36px;
 }
 
-/* ===== グリッド ===== */
+.site-header__eyebrow {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--caramel);
+  margin-bottom: 14px;
+}
+
+.site-header__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 500;
+  color: var(--espresso);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+}
+
+.site-header__divider {
+  width: 48px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--caramel), transparent);
+  margin: 20px auto;
+}
+
+.site-header__subtitle {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+
+/* ===== Main ===== */
+.contents {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 28px 96px;
+}
+
+/* ===== Grid ===== */
 .l-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-  align-items: stretch;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 18px;
+  list-style: none;
 }
 
-/* ===== カード ===== */
+/* ===== Card ===== */
 .c-card {
-  position: relative; /* 全体リンクに必要 */
-  background: linear-gradient(180deg, #fff 0%, #f9fafc 100%);
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  justify-content: stretch;
-  height: 100%; /* gridセルに合わせて伸びる */
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.07);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  height: 100%;
+  box-shadow: 0 2px 10px var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+  overflow: hidden;
+}
+
+.c-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--caramel);
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .c-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px var(--shadow);
+  border-color: var(--caramel);
 }
 
-/* ===== 全体クリック領域 ===== */
+.c-card:hover::after {
+  opacity: 1;
+}
+
 .c-card__detail {
   position: absolute;
   inset: 0;
@@ -58,53 +117,61 @@ h1 {
   cursor: pointer;
 }
 
-/* ===== カード本文 ===== */
 .c-card__body {
-  flex: 1; /* 中身が少なくても伸びる */
-  padding: 24px;
+  flex: 1;
+  padding: 30px 22px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: center; /* 中央配置 */
+  align-items: center;
   text-align: center;
   z-index: 20;
-  pointer-events: none; /* 背景リンクにクリック通す */
+  pointer-events: none;
+  gap: 10px;
 }
 
-.c-card__body a {
-  pointer-events: auto; /* 個別リンクを生かす */
-}
+.c-card__body a { pointer-events: auto; }
 
-/* ===== タイトル ===== */
 .c-card__title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.65;
+  margin: 0;
 }
 
 .c-card__title a {
   text-decoration: none;
-  color: #222;
+  color: var(--coffee);
+}
+
+.c-card__title a:hover { color: var(--caramel); }
+
+.c-card__badge {
   display: inline-block;
-  padding: 0.2em 0.4em;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 2px 9px;
+  border-radius: 20px;
 }
 
-.c-card__title a:hover {
-  color: #0078d7;
+/* ===== Footer ===== */
+.site-footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.05em;
 }
 
-/* ===== サムネイル（将来用） ===== */
-.c-card__thumbnail img {
-  width: 100%;
-  display: block;
-}
-
-/* ===== 視覚的に隠す ===== */
+/* ===== Visually hidden ===== */
 .u-visuallyHidden {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
   border: 0;
